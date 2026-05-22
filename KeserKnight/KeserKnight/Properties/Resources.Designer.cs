@@ -63,6 +63,26 @@ namespace KeserKnight.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap kalp_bos {
+            get {
+                object obj = ResourceManager.GetObject("kalp_bos", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap kalp_dolu {
+            get {
+                object obj = ResourceManager.GetObject("kalp_dolu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap shovel_knight {
             get {
                 object obj = ResourceManager.GetObject("shovel_knight", resourceCulture);
