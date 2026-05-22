@@ -9,3 +9,14 @@ C:\Users\firat\source\repos\KeserKnight\KeserKnight\bin\Debug\KeserKnight.pdb
 C:\Users\firat\source\repos\KeserKnight\KeserKnight\obj\Debug\KeserKnight.exe
 C:\Users\firat\source\repos\KeserKnight\KeserKnight\obj\Debug\KeserKnight.pdb
 C:\Users\firat\source\repos\KeserKnight\KeserKnight\obj\Debug\KeserKnight.exe.config
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\bin\Debug\KeserKnight.exe.config
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\bin\Debug\KeserKnight.exe
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\bin\Debug\KeserKnight.pdb
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.csproj.AssemblyReference.cache
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.exe.config
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.Properties.Resources.resources
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.csproj.GenerateResource.cache
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.csproj.CoreCompileInputs.cache
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.exe
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.pdb
+C:\Users\ASUS\Desktop\oyun\oyuuun-main\KeserKnight\KeserKnight\obj\Debug\KeserKnight.Form1.resources

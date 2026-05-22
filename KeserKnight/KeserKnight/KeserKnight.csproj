@@ -46,7 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Combat\AttackSystem.cs" />
+    <Compile Include="Core\InputManager.cs" />
+    <Compile Include="Core\PhysicsEngine.cs" />
     <Compile Include="Enemy.cs" />
+    <Compile Include="Entity\Enemy.cs" />
+    <Compile Include="Entity\Player.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,8 +59,17 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Gold.cs" />
+    <Compile Include="Map\GameMap.cs" />
+    <Compile Include="Map\Gold.cs" />
+    <Compile Include="Map\RoomManager.cs" />
+    <Compile Include="Map\Tile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\GameOverUI.cs" />
+    <Compile Include="UI\HUD.cs" />
+    <Compile Include="UI\HUDRenderer.cs" />
+    <Compile Include="UI\MainMenu.cs" />
+    <Compile Include="UI\PauseMenu.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -83,22 +97,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\shovel knight.png" />
+    <None Include="Resources\shovel knight1.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\oh.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\kalp.png" />
+    <None Include="Resources\sovmalye.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\kalp2.png" />
+    <None Include="Resources\kalp_dolu.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\kalp %281%29.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\kalp2 %281%29.png" />
+    <None Include="Resources\kalp_bos.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
