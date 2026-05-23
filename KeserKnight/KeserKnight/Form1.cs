@@ -9,6 +9,7 @@ using KeserKnight.UI;
 using KeserKnight.Core;
 using KeserKnight.Combat;
 
+
 namespace KeserKnight
 {
     public partial class Form1 : Form
@@ -30,7 +31,7 @@ namespace KeserKnight
         List<Rectangle> platforms = new List<Rectangle>();
         List<Enemy> enemies = new List<Enemy>();
         List<Gold> roomGolds = new List<Gold>();
-
+        public static List<Rectangle> GlobalPlatforms;
         bool isGameOver = false;
         int totalGold = 0;
         DateTime lastF11Time = DateTime.MinValue;
@@ -119,6 +120,8 @@ namespace KeserKnight
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            Form1.GlobalPlatforms = platforms;
+            
             if (currentGameState != GameState.Playing) { this.Invalidate(); return; }
             if (isGameOver) return;
 
@@ -133,7 +136,27 @@ namespace KeserKnight
             }
 
             attackSystem.UpdateAttackHitbox(player);
-            attackSystem.CheckEnemyCollisions(player, enemies);
+
+            if (player.IsAttacking && !player.AttackHitbox.IsEmpty)
+            {
+                int facing = (player.CurrentDirection == Player.Direction.Right) ? 1 : -1;
+
+                foreach (var enemy in enemies)
+                {
+                    if (!enemy.IsDead && player.AttackHitbox.IntersectsWith(enemy.Hitbox))
+                    {
+                        // Düşmana 10 hasar verir (Canı 20 olduğu için ilk vuruşta ölmez!)
+                        enemy.TakeDamage(10, facing);
+
+                        // Başarılı vuruş sonrası oyuncu recoil (yukarı sekme) hareketi
+                        player.VerticalVelocity = -15;
+                        if (player.CurrentDirection == Player.Direction.Left) player.X += 40; else player.X -= 40;
+
+                        player.IsAttacking = false; // Vuruş sayıldı, atağı kapat
+                        break;
+                    }
+                }
+            }
 
             bool roomChanged = roomManager.Update(player, platforms, enemies, roomGolds);
             if (roomChanged)
@@ -143,8 +166,15 @@ namespace KeserKnight
 
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
+
                 var enemy = enemies[i];
-                enemy.Update();
+                enemy.Update(platforms);
+
+                if (enemy.IsDead && enemy.HurtTimer >= 85)
+                {
+                    enemies.RemoveAt(i);
+                    continue;  
+                }
 
                 if (player.Hitbox.IntersectsWith(enemy.Hitbox))
                 {
@@ -152,7 +182,7 @@ namespace KeserKnight
                     if (dead) isGameOver = true;
                     else if (player.IsInvincible && player.InvincibilityTimer == 0)
                     {
-                        player.VerticalVelocity = -15;
+                        player.VerticalVelocity = -9;
                         if (player.CurrentDirection == Player.Direction.Left) player.X += 40; else player.X -= 40;
                     }
                     break;
@@ -175,6 +205,8 @@ namespace KeserKnight
         {
             if (canvasGraphics == null || virtualCanvas == null) return;
 
+            // Eğrilerin ve vuruş kıvılcımlarının kusursuz neon parlaklığında durması için AntiAlias aktif 
+            canvasGraphics.SmoothingMode = SmoothingMode.AntiAlias;
             canvasGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             canvasGraphics.PixelOffsetMode = PixelOffsetMode.Half;
 
@@ -186,21 +218,17 @@ namespace KeserKnight
             {
                 canvasGraphics.Clear(Color.FromArgb(20, 24, 43));
 
+                // 1. KATMAN: Platformlar ve Harita Nesneleri
                 foreach (var platform in platforms) canvasGraphics.FillRectangle(Brushes.LightSlateGray, platform);
-
-                foreach (var enemy in enemies) enemy.Draw(canvasGraphics);
                 foreach (var gold in roomGolds) gold.Draw(canvasGraphics);
 
+                // 2. KATMAN: Düşmanlar
+                foreach (var enemy in enemies) enemy.Draw(canvasGraphics);
+
+                // 3. KATMAN: Ana Karakter Çizimi
                 if (playerImage != null)
                 {
-                    // drawRect genişliğini direkt player.Hitbox.Width yaparak fizikle resmi %100 eşitledik usta!
-                    Rectangle drawRect = new Rectangle(
-                        player.Hitbox.X,
-                        player.Hitbox.Y,
-                        player.Hitbox.Width, // Genişlik artık tam 80 piksel, sünme bitti!
-                        player.Hitbox.Height
-                    );
-
+                    Rectangle drawRect = new Rectangle(player.Hitbox.X, player.Hitbox.Y, player.Hitbox.Width, player.Hitbox.Height);
                     if (player.CurrentDirection == Player.Direction.Left)
                     {
                         GraphicsState state = canvasGraphics.Save();
@@ -214,20 +242,109 @@ namespace KeserKnight
                         canvasGraphics.DrawImage(playerImage, drawRect);
                     }
                 }
-
                 else canvasGraphics.FillRectangle(Brushes.Black, player.Hitbox);
 
+                
+                //  CİLALI VURUŞ MOTORU 
+                
                 if (player.IsAttacking && !player.AttackHitbox.IsEmpty)
                 {
-                    using (SolidBrush attackBrush = new SolidBrush(Color.FromArgb(150, Color.Yellow))) canvasGraphics.FillRectangle(attackBrush, player.AttackHitbox);
-                    canvasGraphics.DrawRectangle(Pens.Red, player.AttackHitbox);
-                }
+                    // Animasyon ilerleme yüzdesi (0.0 - 1.0)
+                    float progress = (float)player.AttackTimer / player.AttackDuration;
 
+                    //  Yumuşak Sönümlenme ve Şeffaflık Hesabı 
+                    // Kılıç izi ilerledikçe şeffaflaşır (Fade-out) 
+                    int alpha = (int)(255 * (1.0f - progress));
+                    if (alpha < 0) alpha = 0;
+
+                    // Hilal yayının dinamik genişleme boyutu (Zamanla ileri doğru uzar)
+                    int arcSize = (int)(110 + (progress * 20));
+
+                    Rectangle arcBounds;
+                    float startAngle, sweepAngle;
+
+                    // Karakterin omuz/göğüs merkezleme yüksekliği
+                    int arcY = player.Hitbox.Y + 10;
+
+                    // Yön ivmelerine göre açıların ve savrulma yönünün belirlenmesi
+                    int facing = (player.CurrentDirection == Player.Direction.Right) ? 1 : -1;
+
+                    if (facing == 1)
+                    {
+                        int arcX = player.Hitbox.Right - 35;
+                        arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+
+                        
+                        startAngle = -90 + (progress * 25);
+                        sweepAngle = 180;
+                    }
+                    else
+                    {
+                        int arcX = player.Hitbox.X - arcSize + 35;
+                        arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+
+                        startAngle = 270 - (progress * 25);
+                        sweepAngle = -180;
+                    }
+
+                    // --- 1. EFEKT: DIŞ NEON PARLAMA KATMANI (Dinamik Alpha ile) ---
+                    using (Pen neonPen = new Pen(Color.FromArgb((int)(alpha * 0.8f), 0, 235, 255), 3f))
+                    {
+                        neonPen.StartCap = LineCap.Round;
+                        neonPen.EndCap = LineCap.Round;
+                        canvasGraphics.DrawArc(neonPen, arcBounds, startAngle, sweepAngle);
+                    }
+
+                    // --- 2. EFEKT: İÇ KESKİN ÇEKİRDEK (Saf Beyaz Hat) ---
+                    using (Pen corePen = new Pen(Color.FromArgb(alpha, 255, 255, 255), 1.5f))
+                    {
+                        corePen.StartCap = LineCap.Round;
+                        corePen.EndCap = LineCap.Round;
+                        canvasGraphics.DrawArc(corePen, arcBounds, startAngle, sweepAngle);
+                    }
+
+                    
+                    if (player.AttackTimer <= 3)
+                    {
+                        // Kılıcın düşmana değdiği muhtemel uç odak noktası (Merkez)
+                        int targetX = (facing == 1) ? player.AttackHitbox.Right : player.AttackHitbox.Left;
+                        int targetY = player.AttackHitbox.Y + (player.AttackHitbox.Height / 2);
+
+                        var rand = new Random(player.AttackTimer); // Stabil rastgelelik için sayacı seed yapıyoruz
+
+                       
+                        for (int j = 0; j < 6; j++)
+                        {
+                            float angleDeg = (facing == 1) ? rand.Next(-45, 45) : rand.Next(135, 225);
+                            double angleRad = angleDeg * Math.PI / 180.0;
+
+                            int sparkLength = rand.Next(20, 45);
+                            int endX = targetX + (int)(Math.Cos(angleRad) * sparkLength);
+                            int endY = targetY + (int)(Math.Sin(angleRad) * sparkLength);
+
+                            using (Pen sparkPen = new Pen(Color.FromArgb(230, 255, 255, 255), 1.5f))
+                            {
+                                canvasGraphics.DrawLine(sparkPen, targetX, targetY, endX, endY);
+                            }
+                        }
+
+                       
+                        int ringRadius = player.AttackTimer * 15; // Kare ilerledikçe halka genişler
+                        using (Pen ringPen = new Pen(Color.FromArgb(150, 0, 235, 255), 1f))
+                        {
+                            canvasGraphics.DrawEllipse(ringPen, targetX - ringRadius, targetY - ringRadius, ringRadius * 2, ringRadius * 2);
+                        }
+                    }
+                }
+               
+
+                // 5. KATMAN: Arayüz (HUD) ve Filtreler
                 HUDRenderer.Draw(canvasGraphics, roomManager.CurrentRoom, player.MaxHealth, player.CurrentHealth, totalGold, kalpDolu, kalpBos);
 
                 if (player.IsInvincible && (player.InvincibilityTimer % 4 == 0))
                 {
-                    using (SolidBrush damageFilter = new SolidBrush(Color.FromArgb(100, Color.Red))) canvasGraphics.FillRectangle(damageFilter, player.Hitbox);
+                    using (SolidBrush damageFilter = new SolidBrush(Color.FromArgb(100, Color.Red)))
+                        canvasGraphics.FillRectangle(damageFilter, player.Hitbox);
                 }
 
                 if (currentGameState == GameState.Paused)
@@ -300,7 +417,7 @@ namespace KeserKnight
             canvasGraphics = Graphics.FromImage(virtualCanvas);
             SetScreenMode(true);
 
-            // Oyuncu boyutu senin girdiğin gibi 130x130 usta
+            
             player = new Player(300, 750, 130, 130);
             physicsEngine = new PhysicsEngine();
             attackSystem = new AttackSystem();

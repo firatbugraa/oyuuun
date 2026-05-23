@@ -58,7 +58,7 @@ namespace KeserKnight.Entity
         // --- SALDIRI (ATTACK) SİSTEMİ ---
         public bool IsAttacking { get; set; } = false;
         public int AttackTimer { get; set; } = 0;
-        public int AttackDuration { get; set; } = 10;
+        public int AttackDuration { get; set; } = 15;
         public Rectangle AttackHitbox { get; set; }
 
         // Görsel Doku

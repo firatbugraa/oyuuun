@@ -41,13 +41,32 @@ namespace KeserKnight.Core
                 }
             }
 
-            if (e.KeyCode == Keys.L) attackSystem.HandleAttackInput(player);
+            if (e.KeyCode == Keys.L)
+            {
+                if (!player.IsAttacking)
+                {
+                    
+                    attackSystem.HandleAttackInput(player);
+
+                    int lungeDistance = 12;
+
+                    if (player.CurrentDirection == Player.Direction.Right)
+                    {
+                        player.X += lungeDistance;
+                    }
+                    else if (player.CurrentDirection == Player.Direction.Left)
+                    {
+                        player.X -= lungeDistance;
+                    }
+                }
+            }
         }
 
         public void HandleGameKeyUp(KeyEventArgs e, Player player)
         {
             if (e.KeyCode == Keys.A) player.MoveLeft = false;
             if (e.KeyCode == Keys.D) player.MoveRight = false;
+
         }
 
         // --- ENÜM DESTEKLİ HIZLANDIRILMIŞ METOT ---
