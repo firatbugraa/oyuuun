@@ -50,24 +50,26 @@ namespace KeserKnight.Core
             if (e.KeyCode == Keys.D) player.MoveRight = false;
         }
 
-        // WinForms'un tuşları yutmasını engelleyen ProcessCmdKey Mantığı
-        public bool HandleProcessCmdKey(Keys keyData, ref int pauseSelection, ref string gameStateStr, Action resumeAction, Action mainMenuAction)
+        // --- ENÜM DESTEKLİ HIZLANDIRILMIŞ METOT ---
+        // 'string' yerine doğrudan Form1'in kendi GameState enum yapısını referans alarak 
+        // metinsel gecikmeleri sıfıra indiriyoruz kanki.
+        public bool HandleProcessCmdKey(Keys keyData, ref int pauseSelection, ref Form1.GameState gameState, Action resumeAction, Action mainMenuAction)
         {
             // 1. Oyun oynanırken ESC basılırsa oyunu durdur
-            if (gameStateStr == "Playing" && keyData == Keys.Escape)
+            if (gameState == Form1.GameState.Playing && keyData == Keys.Escape)
             {
-                gameStateStr = "Paused";
+                gameState = Form1.GameState.Paused;
                 pauseSelection = 0;
                 return true;
             }
 
             // 2. Oyun zaten duraklatılmışsa (ESC Menüsündeyken)
-            else if (gameStateStr == "Paused")
+            else if (gameState == Form1.GameState.Paused)
             {
                 if (keyData == Keys.Escape)
                 {
                     resumeAction?.Invoke();
-                    gameStateStr = "Playing";
+                    gameState = Form1.GameState.Playing;
                     return true;
                 }
 
@@ -78,7 +80,7 @@ namespace KeserKnight.Core
                     return true;
                 }
 
-                // Aşağı Taşıma (S... Veya Aşağı Ok)
+                // Aşağı Taşıma (S veya Aşağı Ok)
                 if (keyData == Keys.S || keyData == Keys.Down)
                 {
                     pauseSelection = (pauseSelection + 1) % 3;
@@ -91,7 +93,7 @@ namespace KeserKnight.Core
                     if (pauseSelection == 0) // DEVAM ET
                     {
                         resumeAction?.Invoke();
-                        gameStateStr = "Playing";
+                        gameState = Form1.GameState.Playing;
                     }
                     else if (pauseSelection == 1) // AYARLAR
                     {
@@ -100,9 +102,9 @@ namespace KeserKnight.Core
                     else if (pauseSelection == 2) // ANA MENÜ
                     {
                         mainMenuAction?.Invoke();
-                        gameStateStr = "MainMenu";
+                        gameState = Form1.GameState.MainMenu;
                     }
-                    return true; // Tuşu başarıyla işledik, Windows başka yere odaklanmasın usta
+                    return true;
                 }
             }
             return false;

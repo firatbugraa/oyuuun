@@ -7,19 +7,14 @@ namespace KeserKnight.Core
 {
     public class PhysicsEngine
     {
-        // Form1'in sadece bu fonksiyonu çağırması yeterlidir usta
         public void Update(Player player, List<Rectangle> platforms)
         {
-            UpdateHorizontalPhysics(player, platforms);
-            UpdateVerticalPhysics(player, platforms);
-            ApplyScreenLimits(player);
-        }
+            // 1. Hızları ve Yerçekimini Güncelle usta
+            player.VerticalVelocity += player.Gravity;
+            if (player.VerticalVelocity > 25) player.VerticalVelocity = 25; // Terminal Velocity
 
-        // 1. YATAY ÇARPIŞMA VE HAREKET HESABI (X EKSENİ)
-        private void UpdateHorizontalPhysics(Player player, List<Rectangle> platforms)
-        {
+            // 2. Karakterin gitmek istediği bir sonraki X ve Y koordinatını hesapla
             int nextX = player.X;
-
             if (player.MoveLeft && !player.MoveRight)
             {
                 nextX -= player.Speed;
@@ -36,89 +31,65 @@ namespace KeserKnight.Core
                 else nextX += player.Speed;
             }
 
-            Rectangle futureX = new Rectangle(nextX, player.Y, player.Width, player.Height);
-            bool collidesX = false;
-            Rectangle hitPlatformX = Rectangle.Empty;
-
-            foreach (var platform in platforms)
-            {
-                if (futureX.IntersectsWith(platform))
-                {
-                    collidesX = true;
-                    hitPlatformX = platform;
-                    break;
-                }
-            }
-
-            if (!collidesX)
-            {
-                player.X = nextX;
-            }
-            else
-            {
-                // Duvara toslama anında pürüzsüz kilitlenme hizalaması
-                if (nextX > player.X) player.X = hitPlatformX.Left - player.Width;
-                else if (nextX < player.X) player.X = hitPlatformX.Right;
-            }
-        }
-
-        // 2. DİKEY ÇARPIŞMA, ZIPLAMA VE YERÇEKİMİ HESABI (Y EKSENİ)
-        private void UpdateVerticalPhysics(Player player, List<Rectangle> platforms)
-        {
-            // Yerçekimi ivmesini uyguluyoruz
-            player.VerticalVelocity += player.Gravity;
             int nextY = player.Y + player.VerticalVelocity;
 
-            Rectangle futureY = new Rectangle(player.X, nextY, player.Width, player.Height);
-            bool landed = false;
+            // 3. Karakteri doğrudan hedef koordinatına taşı usta (Çift adımdan kurtulduk)
+            player.X = nextX;
+            player.Y = nextY;
 
+            // Havada kalma durumunu başta aktif et, eğer zemine basarsa aşağıda false yapacağız
+            player.IsJumping = true;
+
+            // 4. ÇARPIŞMA ÇÖZÜMLEME MOTORU (RESOLVE COLLISION)
+            // Karakter platformun içine girdiyse, onu ışınlamadan milimetrik geri iteceğiz
             foreach (var platform in platforms)
             {
-                if (futureY.IntersectsWith(platform))
+                if (player.Hitbox.IntersectsWith(platform))
                 {
-                    // Aşağı düşerken zemine basma kontrolü
-                    if (player.VerticalVelocity > 0)
+                    // Çakışan alanın (Overlap) genişliğini ve yüksekliğini buluyoruz
+                    Rectangle overlap = Rectangle.Intersect(player.Hitbox, platform);
+
+                    // Eğer çakışma dikeyde daha sığsa (Y ekseninden düzeltme yap usta)
+                    if (overlap.Width > overlap.Height)
                     {
-                        player.Y = platform.Top - player.Height;
-                        player.VerticalVelocity = 0;
-                        player.IsJumping = false;
-                        landed = true;
-                        break;
+                        if (player.VerticalVelocity >= 0 && player.Y < platform.Top) // Zemine basma
+                        {
+                            player.Y = platform.Top - player.Height;
+                            player.VerticalVelocity = 0;
+                            player.IsJumping = false;
+                        }
+                        else if (player.VerticalVelocity < 0 && player.Y > platform.Top) // Kafayı tavana vurma
+                        {
+                            player.Y = platform.Bottom + 1;
+                            player.VerticalVelocity = 0;
+                        }
                     }
-                    // Yukarı zıplarken kafayı tavan bloğuna vurma kontrolü
-                    else if (player.VerticalVelocity < 0)
+                    // Eğer çakışma yatayda daha sığsa (X ekseninden duvara it usta - IŞINLANMAYI BİTİREN KISIM)
+                    else
                     {
-                        player.Y = platform.Bottom;
-                        player.VerticalVelocity = 0;
-                        break;
+                        if (player.X < platform.X) // Soldan duvara çarpma
+                        {
+                            player.X = platform.Left - player.Width - 1;
+                        }
+                        else // Sağdan duvara çarpma
+                        {
+                            player.X = platform.Right + 1;
+                        }
                     }
                 }
             }
 
-            // Eğer havadaysa ve bir yere basmıyorsa zıplama/düşme durumunu aktifleştir
-            if (!landed)
-            {
-                player.Y = nextY;
-                player.IsJumping = true;
-            }
-            else
-            {
-                player.IsJumping = false;
-            }
+            // 5. EKRANIN ÜST SINIR LİMİT KORUMASI
+            ApplyScreenLimits(player);
         }
 
-        // 3. EKRANIN ÜST VE ALT SINIR LIMIT KORUMALARI
         private void ApplyScreenLimits(Player player)
         {
-            // Siyah HUD barın (Tavanın) üstüne çıkmasını engelleme kilidi aktiftir
             if (player.Y < 110)
             {
                 player.Y = 110;
                 player.VerticalVelocity = 0;
             }
-
-            // DİKKAT: Alt sınır korumasını (Y > 1080 kısıtlamasını) sildik! 
-            // Böylece oyuncu boşluktan aşağı düşebilecek ve Form1'deki ölüm tetiklenecek.
         }
     }
 }

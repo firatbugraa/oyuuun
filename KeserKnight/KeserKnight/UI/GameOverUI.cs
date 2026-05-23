@@ -18,13 +18,17 @@ namespace KeserKnight.UI
                 g.FillRectangle(alphaBrush, 0, 0, 1920, 1080);
             }
 
-            // GAME OVER Yazısı
-            Font gameOverFont = new Font("Arial", 60, FontStyle.Bold);
-            g.DrawString("GAME OVER", gameOverFont, Brushes.Red, (1920 - TextRenderer.MeasureText("GAME OVER", gameOverFont).Width) / 2, 400);
+            // --- BELLEK KORUMA ALANI ---
+            // Her iki yazı tipini de tek bir güvenli using bloğunda topluyoruz usta
+            using (Font gameOverFont = new Font("Arial", 60, FontStyle.Bold))
+            using (Font subFont = new Font("Arial", 25, FontStyle.Regular))
+            {
+                // GAME OVER Yazısı
+                g.DrawString("GAME OVER", gameOverFont, Brushes.Red, (1920 - TextRenderer.MeasureText("GAME OVER", gameOverFont).Width) / 2, 400);
 
-            // Yeniden Başlama İpucu
-            Font subFont = new Font("Arial", 25, FontStyle.Regular);
-            g.DrawString("Yeniden Başlamak İçin 'R' Tuşuna Basın", subFont, Brushes.White, (1920 - TextRenderer.MeasureText("Yeniden Başlamak İçin 'R' Tuşuna Basın", subFont).Width) / 2, 550);
+                // Yeniden Başlama İpucu
+                g.DrawString("Yeniden Başlamak İçin 'R' Tuşuna Basın", subFont, Brushes.White, (1920 - TextRenderer.MeasureText("Yeniden Başlamak İçin 'R' Tuşuna Basın", subFont).Width) / 2, 550);
+            }
         }
     }
 }

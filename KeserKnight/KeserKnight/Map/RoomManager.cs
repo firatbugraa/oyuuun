@@ -25,29 +25,46 @@ namespace KeserKnight.Map
         }
 
         // Oda geçiş sınırlarını denetleyen ve haritayı güncelleyen ana fonksiyon
-        public void Update(Player player, List<Rectangle> platforms, List<Enemy> enemies, List<Gold> roomGolds)
+        // Geriye 'bool' döndürerek Form1'e "Oda değişti, ekranı tazeleyebilirsin" mesajı verir usta
+        public bool Update(Player player, List<Rectangle> platforms, List<Enemy> enemies, List<Gold> roomGolds)
         {
             // --- SAĞDAN ODA GEÇİŞ KONTROLÜ ---
             if (player.X > mapWidth)
             {
+                // Gitmeden önce şu anki odanın temizlenmiş halini hafızaya mühürle usta!
+                GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds);
+
                 CurrentRoom++;
-                player.X = 1; // Sol köşeden yeni odaya giriş yapar
+                player.X = 10;
+
+                // Şimdi yeni odayı yükle
                 GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds);
+                return true;
             }
+
             // --- SOLDAN ODA GEÇİŞ KONTROLÜ ---
             else if (player.X + player.Width < 0)
             {
                 if (CurrentRoom > 1)
                 {
+                    // Gitmeden önce şu anki odanın temizlenmiş halini hafızaya mühürle usta!
+                    GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds);
+
                     CurrentRoom--;
-                    player.X = mapWidth - player.Width - 1; // Sağ köşeden eski odaya geri giriş yapar
+                    player.X = mapWidth - player.Width - 15;
+
+                    // Şimdi eski odayı yükle (Bıraktığımız gibi gelecek!)
                     GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds);
+                    return true;
                 }
                 else
                 {
-                    player.X = 0; // İlk odadaysa sol duvara takılır, dışarı çıkamaz
+                    player.X = 0;
                 }
             }
+
+            return false;
         }
+
     }
 }

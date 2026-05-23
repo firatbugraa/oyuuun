@@ -26,37 +26,40 @@ namespace KeserKnight.Combat
                 return;
             }
 
-            // Karakterin baktığı yöne göre 80 piksel genişliğinde bir kürek menzili oluşturuyoruz
+            // KESİN SENKRONİZASYON FİXİ:
+            // Işınlanmayı ve ıska geçmeyi engellemek için doğrudan player.Hitbox'ın anlık güncel sınırlarını okuyoruz usta.
+            var pHitbox = player.Hitbox;
+
             if (player.CurrentDirection == Player.Direction.Left)
             {
-                player.AttackHitbox = new Rectangle(player.X - 80, player.Y + 10, 80, player.Height - 20);
+                player.AttackHitbox = new Rectangle(pHitbox.X - 80, pHitbox.Y + 10, 80, pHitbox.Height - 20);
             }
             else
             {
-                player.AttackHitbox = new Rectangle(player.Right, player.Y + 10, 80, player.Height - 20);
+                player.AttackHitbox = new Rectangle(pHitbox.Right, pHitbox.Y + 10, 80, pHitbox.Height - 20);
             }
         }
 
         // 3. Düşmanların Vurulma Durumunu ve Can Kayıplarını Kontrol Etme
         public void CheckEnemyCollisions(Player player, List<Enemy> enemies)
         {
-            // Eğer oyuncu saldırmıyorsa veya hitbox henüz oluşmamışsa kontrol etme
             if (!player.IsAttacking || player.AttackHitbox.IsEmpty) return;
 
-            // Listeden eleman silinebileceği için döngüyü tersten (Count - 1 down to 0) işletiyoruz
+            // Listeden eleman silinebileceği için döngüyü tersten işletiyoruz usta
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 var enemy = enemies[i];
 
+                // Hem player.AttackHitbox hem de enemy.Hitbox artık property üzerinden %100 gerçek koordinatları veriyor.
                 if (player.AttackHitbox.IntersectsWith(enemy.Hitbox))
                 {
                     // Düşman darbe aldı: Listeden kaldır
                     enemies.RemoveAt(i);
 
-                    // Başarılı vuruş sonrası Shovel Knight geleneği olarak saldırı durumunu kapatıyoruz
+                    // Başarılı vuruş sonrası saldırı durumunu kapatıyoruz
                     player.IsAttacking = false;
                     player.AttackHitbox = Rectangle.Empty;
-                    break; // Tek karede yalnızca bir düşmana vurma sınırı (isteğe bağlı)
+                    break;
                 }
             }
         }

@@ -42,15 +42,19 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(935, 523);
+            this.ClientSize = new System.Drawing.Size(1920, 1080); // Tam ekran hedef çözünürlüğümüz usta
             this.DoubleBuffered = true;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "KeserKnight";
+
+            // --- EVENT MAPPER KİLİTLEMESİ ---
+            // Derleyiciyi ayağa kaldıran, Form1.cs ile burayı kusursuz eşitleyen can damarı satırlar:
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
-            this.ResumeLayout(false);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick); // İşte eksik olan sinsi cıvata buydu!
 
+            this.ResumeLayout(false);
         }
 
         #endregion
@@ -58,4 +62,3 @@
         private System.Windows.Forms.Timer timer1;
     }
 }
-

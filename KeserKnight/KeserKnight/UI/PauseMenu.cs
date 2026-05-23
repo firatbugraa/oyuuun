@@ -26,23 +26,32 @@ namespace KeserKnight.UI
                 g.DrawString(pTitleText, pauseTitleFont, Brushes.Gold, pTitleX, 280);
             }
 
-            // Devam Et Butonu
-            g.FillRectangle(Brushes.DarkBlue, resumeBtn);
-            if (pauseSelection == 0) g.DrawRectangle(new Pen(Color.White, 5), resumeBtn);
-            else g.DrawRectangle(Pens.Cyan, resumeBtn);
-            g.DrawString("DEVAM ET", new Font("Arial", 18, FontStyle.Bold), Brushes.White, resumeBtn.X + 85, resumeBtn.Y + 15);
+            // --- BELLEK KORUMA ALANI ---
+            // Tüm butonların yazı tiplerini ve çerçeve kalemlerini tek seferde kafesliyoruz usta
+            using (Font btnFont = new Font("Arial", 18, FontStyle.Bold))
+            using (Pen selectPen = new Pen(Color.White, 5))
+            using (Pen cyanPen = new Pen(Color.Cyan, 1))
+            using (Pen lightGrayPen = new Pen(Color.LightGray, 1))
+            using (Pen redPen = new Pen(Color.Red, 1))
+            {
+                // Devam Et Butonu
+                g.FillRectangle(Brushes.DarkBlue, resumeBtn);
+                if (pauseSelection == 0) g.DrawRectangle(selectPen, resumeBtn);
+                else g.DrawRectangle(cyanPen, resumeBtn);
+                g.DrawString("DEVAM ET", btnFont, Brushes.White, resumeBtn.X + 85, resumeBtn.Y + 15);
 
-            // Ayarlar Butonu
-            g.FillRectangle(Brushes.DarkSlateGray, settingsBtn);
-            if (pauseSelection == 1) g.DrawRectangle(new Pen(Color.White, 5), settingsBtn);
-            else g.DrawRectangle(Pens.LightGray, settingsBtn);
-            g.DrawString("AYARLAR", new Font("Arial", 18, FontStyle.Bold), Brushes.White, settingsBtn.X + 90, settingsBtn.Y + 15);
+                // Ayarlar Butonu
+                g.FillRectangle(Brushes.DarkSlateGray, settingsBtn);
+                if (pauseSelection == 1) g.DrawRectangle(selectPen, settingsBtn);
+                else g.DrawRectangle(lightGrayPen, settingsBtn);
+                g.DrawString("AYARLAR", btnFont, Brushes.White, settingsBtn.X + 90, settingsBtn.Y + 15);
 
-            // Ana Menü Butonu
-            g.FillRectangle(Brushes.DarkRed, mainMenuBtn);
-            if (pauseSelection == 2) g.DrawRectangle(new Pen(Color.White, 5), mainMenuBtn);
-            else g.DrawRectangle(Pens.Red, mainMenuBtn);
-            g.DrawString("ANA MENÜ", new Font("Arial", 18, FontStyle.Bold), Brushes.White, mainMenuBtn.X + 85, mainMenuBtn.Y + 15);
+                // Ana Menü Butonu
+                g.FillRectangle(Brushes.DarkRed, mainMenuBtn);
+                if (pauseSelection == 2) g.DrawRectangle(selectPen, mainMenuBtn);
+                else g.DrawRectangle(redPen, mainMenuBtn);
+                g.DrawString("ANA MENÜ", btnFont, Brushes.White, mainMenuBtn.X + 85, mainMenuBtn.Y + 15);
+            }
         }
     }
 }

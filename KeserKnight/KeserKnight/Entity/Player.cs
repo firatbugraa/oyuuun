@@ -5,12 +5,30 @@ namespace KeserKnight.Entity
 {
     public class Player
     {
-        // --- GEOMETRİK SINIRLAR ---
-        public Rectangle Hitbox;
-        public int X { get => Hitbox.X; set => Hitbox.X = value; }
-        public int Y { get => Hitbox.Y; set => Hitbox.Y = value; }
-        public int Width => Hitbox.Width;
-        public int Height => Hitbox.Height;
+        // --- GEOMETRİK SINIRLAR (ÇELİŞKİSİZ MOTOR) ---
+        private int _x;
+        private int _y;
+        private int _width;
+        private int _height;
+
+        public int X
+        {
+            get => _x;
+            set { _x = value; UpdateHitbox(); }
+        }
+
+        public int Y
+        {
+            get => _y;
+            set { _y = value; UpdateHitbox(); }
+        }
+
+        public int Width => _width;
+        public int Height => _height;
+
+        // Form1 ve Fizik Motorunun doğrudan okuduğu kilit kapsül
+        public Rectangle Hitbox { get; private set; }
+
         public int Right => Hitbox.Right;
         public int Bottom => Hitbox.Bottom;
         public int Top => Hitbox.Top;
@@ -48,14 +66,29 @@ namespace KeserKnight.Entity
 
         public Player(int x, int y, int width, int height, Image texture = null)
         {
-            Hitbox = new Rectangle(x, y, width, height);
+            _x = x;
+            _y = y;
+            _width = width;
+            _height = height;
             this.Texture = texture;
+            UpdateHitbox();
         }
 
-        // --- GÜNCELLEME MOTORU (Zamanlayıcı Tetiklemeleri) ---
+        private void UpdateHitbox()
+        {
+            int paddingX = 25; // Sağ ve soldan kırpılacak miktar
+
+            Hitbox = new Rectangle(
+                _x + paddingX,
+                _y,
+                _width - (paddingX * 2),
+                _height
+            );
+        }
+
+        // --- GÜNCELLEME MOTORU ---
         public void Update()
         {
-            // Ölümsüzlük sayacını ilerlet
             if (IsInvincible)
             {
                 InvincibilityTimer++;
@@ -65,7 +98,6 @@ namespace KeserKnight.Entity
                 }
             }
 
-            // Saldırı süresini denetle
             if (IsAttacking)
             {
                 AttackTimer++;
@@ -83,9 +115,8 @@ namespace KeserKnight.Entity
             if (IsInvincible) return false;
 
             CurrentHealth--;
-            if (CurrentHealth <= 0) return true; // Öldü mü? -> True
+            if (CurrentHealth <= 0) return true;
 
-            // Ölmediyse ölümsüzlük sürecini başlat usta
             IsInvincible = true;
             InvincibilityTimer = 0;
             return false;
@@ -103,10 +134,11 @@ namespace KeserKnight.Entity
             MoveLeft = false;
             MoveRight = false;
             VerticalVelocity = 0;
-            X = startX;
-            Y = startY;
+            _x = startX;
+            _y = startY;
             CurrentDirection = Direction.Right;
             AttackHitbox = Rectangle.Empty;
+            UpdateHitbox();
         }
     }
 }
