@@ -31,11 +31,11 @@ namespace KeserKnight.Core
                 else nextX += player.Speed;
             }
 
-            int nextY = player.Y + player.VerticalVelocity;
+            float nextY = player.Y + player.VerticalVelocity;
 
             // 3. Karakteri doğrudan hedef koordinatına taşı usta (Çift adımdan kurtulduk)
             player.X = nextX;
-            player.Y = nextY;
+            player.Y = (int)nextY;
 
             // Havada kalma durumunu başta aktif et, eğer zemine basarsa aşağıda false yapacağız
             player.IsJumping = true;

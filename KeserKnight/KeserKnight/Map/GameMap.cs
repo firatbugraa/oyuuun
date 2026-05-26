@@ -72,7 +72,7 @@ namespace KeserKnight.Map
             isInitialized = true;
         }
 
-        // Kilit Çözüm: Odayı yüklemeden önce her şeyi temizleyip yenisini bağlıyoruz usta
+        // Kilit Çözüm: Odayı yüklemeden önce her şeyi temizleyip yenisini bağlıyoruz 
         public static void LoadRoom(int currentRoom, List<Rectangle> activePlatforms, List<Enemy> activeEnemies, List<Gold> activeGolds)
         {
             if (!isInitialized) InitializeWorld();

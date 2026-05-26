@@ -145,47 +145,111 @@ namespace KeserKnight
                 {
                     if (!enemy.IsDead && player.AttackHitbox.IntersectsWith(enemy.Hitbox))
                     {
-                        // Düşmana 10 hasar verir (Canı 20 olduğu için ilk vuruşta ölmez!)
                         enemy.TakeDamage(10, facing);
-
-                        // Başarılı vuruş sonrası oyuncu recoil (yukarı sekme) hareketi
                         player.VerticalVelocity = -15;
                         if (player.CurrentDirection == Player.Direction.Left) player.X += 40; else player.X -= 40;
 
-                        player.IsAttacking = false; // Vuruş sayıldı, atağı kapat
+                        
                         break;
                     }
                 }
             }
 
+           
+            // RETRO EKRAN KAYMA MOTORU
+           
+            // Oda değişti mi kontrol et
             bool roomChanged = roomManager.Update(player, platforms, enemies, roomGolds);
+
             if (roomChanged)
             {
+                // 1. Eski odanın ekran görüntüsünü hafızaya al
+                Bitmap oldRoomImg = new Bitmap(virtualCanvas);
+
+                // 2. Yeni odanın verilerini arkada yükle
+                SyncLoadRoom();
+
+                // 3. Yeni odanın ilk halini gizlice çizdirip onun da fotoğrafını çek
+                PaintEventArgs fakePaint = new PaintEventArgs(this.CreateGraphics(), this.ClientRectangle);
+                Form1_Paint(this, fakePaint);
+                Bitmap newRoomImg = new Bitmap(virtualCanvas);
+
+                // Kayma hızı (Piksel) ve yön tespiti
+                int scrollSpeed = 60;
+                bool scrollLeft = (player.X < targetWidth / 2);
+
+                // 4. Kaydırma animasyonu döngüsü 
+                for (int offset = 0; offset <= targetWidth; offset += scrollSpeed)
+                {
+                    using (Graphics g = Graphics.FromImage(virtualCanvas))
+                    {
+                        g.Clear(Color.FromArgb(20, 24, 43)); // Arka plan rengi
+
+                        if (scrollLeft)
+                        {
+                            // Karakter sağa gitti -> Ekran SOLA kayıyor
+                            g.DrawImage(oldRoomImg, -offset, 0);
+                            g.DrawImage(newRoomImg, targetWidth - offset, 0);
+                        }
+                        else
+                        {
+                            // Karakter sola gitti -> Ekran SAĞA kayıyor
+                            g.DrawImage(oldRoomImg, offset, 0);
+                            g.DrawImage(newRoomImg, -targetWidth + offset, 0);
+                        }
+                    }
+
+                    // 5. Çizilen kareyi anlık olarak oyuncunun monitörüne yansıt
+                    using (Graphics formGraphics = this.CreateGraphics())
+                    {
+                        formGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        formGraphics.DrawImage(virtualCanvas, 0, 0, this.ClientSize.Width, this.ClientSize.Height);
+                    }
+
+                    System.Threading.Thread.Sleep(1); // Akıcılık için mini gecikme
+                }
+
+                // 6. RAM şişmesini önlemek için kullanılan resimleri imha et
+                oldRoomImg.Dispose();
+                newRoomImg.Dispose();
+
+                // Kontrolü tekrar klavyeye ver
                 this.Focus();
             }
+            // =========================================================================
 
+            // Form1.cs -> timer1_Tick içindeki düşman döngüsünün yeni hali 
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
-
                 var enemy = enemies[i];
-                enemy.Update(platforms);
 
+                // 1. Yapay zekaya hem zeminleri hem de bizim oyuncuyu gönderiyoruz 
+                enemy.Update(platforms, player);
+
+                // Arkadaşının yazdığı ölüm/silinme sayacı
                 if (enemy.IsDead && enemy.HurtTimer >= 85)
                 {
                     enemies.RemoveAt(i);
-                    continue;  
+                    continue;
                 }
 
-                if (player.Hitbox.IntersectsWith(enemy.Hitbox))
+                //  2. DÜŞMANIN BİZE KILIÇLA VURMA KONTROLÜ
+                // Düşman kılıç salladıysa ve o kılıç alanı bizim oyuncuya değdiyse hasar alacağız!
+                if (enemy.IsEnemyAttacking && !enemy.EnemyAttackHitbox.IsEmpty)
                 {
-                    bool dead = player.TakeDamage();
-                    if (dead) isGameOver = true;
-                    else if (player.IsInvincible && player.InvincibilityTimer == 0)
+                    if (enemy.EnemyAttackHitbox.IntersectsWith(player.Hitbox))
                     {
-                        player.VerticalVelocity = -9;
-                        if (player.CurrentDirection == Player.Direction.Left) player.X += 40; else player.X -= 40;
+                        bool dead = player.TakeDamage();
+                        if (dead) isGameOver = true;
+                        else if (player.IsInvincible && player.InvincibilityTimer == 0)
+                        {
+                            player.VerticalVelocity = -9;
+                            if (player.CurrentDirection == Player.Direction.Left) player.X += 40; else player.X -= 40;
+                        }
+
+                        
+                        break;
                     }
-                    break;
                 }
             }
 
@@ -224,6 +288,85 @@ namespace KeserKnight
 
                 // 2. KATMAN: Düşmanlar
                 foreach (var enemy in enemies) enemy.Draw(canvasGraphics);
+                // 2. KATMAN: Düşmanlar
+                foreach (var enemy in enemies)
+                {
+                    enemy.Draw(canvasGraphics);
+
+                    // DUSMAN KILIC EFEKTI MOTORU 
+                    if (enemy.IsEnemyAttacking && !enemy.EnemyAttackHitbox.IsEmpty)
+                    {
+                        // Animasyon ilerleme yuzdesi 
+                        float progress = (float)(12 - enemy.EnemyAttackTimer) / 12f;
+
+                        // Şeffaflık hesabı (Fade-out)
+                        int alpha = (int)(255 * (1.0f - progress));
+                        if (alpha < 0) alpha = 0;
+
+                        // Hilal yayının boyutu
+                        int arcSize = (int)(110 + (progress * 20));
+                        Rectangle arcBounds;
+                        float startAngle, sweepAngle;
+
+                        // Düşmanın omuz yuksekligi merkezlemesi
+                        int arcY = enemy.Y + 10;
+
+                        if (enemy.EnemyAttackHitbox.X > enemy.X) // Sag yon kontrolu
+                        {
+                            int arcX = enemy.X + enemy.Width - 35;
+                            arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+                            startAngle = -90 + (progress * 25);
+                            sweepAngle = 180;
+                        }
+                        else // Sol yon kontrolu
+                        {
+                            int arcX = enemy.X - arcSize + 35;
+                            arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+                            startAngle = 270 - (progress * 25);
+                            sweepAngle = -180;
+                        }
+
+                        // 1. EFEKT: Dis Parlama Katmanı (Saf Beyaz Seffaflık ile)
+                        using (Pen neonPen = new Pen(Color.FromArgb((int)(alpha * 0.5f), 255, 255, 255), 3f))
+                        {
+                            neonPen.StartCap = LineCap.Round;
+                            neonPen.EndCap = LineCap.Round;
+                            canvasGraphics.DrawArc(neonPen, arcBounds, startAngle, sweepAngle);
+                        }
+
+                        // 2. EFEKT: Ic Keskin Cekirdek (Saf Beyaz Hat)
+                        using (Pen corePen = new Pen(Color.FromArgb(alpha, 255, 255, 255), 1.5f))
+                        {
+                            corePen.StartCap = LineCap.Round;
+                            corePen.EndCap = LineCap.Round;
+                            canvasGraphics.DrawArc(corePen, arcBounds, startAngle, sweepAngle);
+                        }
+
+                        // 3. EFEKT: Kılıç Kıvılcımları (Sadece ilk karelerde patlar)
+                        if (enemy.EnemyAttackTimer >= 9)
+                        {
+                            int targetX = (enemy.EnemyAttackHitbox.X > enemy.X) ? enemy.EnemyAttackHitbox.Right : enemy.EnemyAttackHitbox.Left;
+                            int targetY = enemy.EnemyAttackHitbox.Y + (enemy.EnemyAttackHitbox.Height / 2);
+
+                            var rand = new Random(enemy.EnemyAttackTimer);
+
+                            for (int j = 0; j < 4; j++)
+                            {
+                                float angleDeg = (enemy.EnemyAttackHitbox.X > enemy.X) ? rand.Next(-30, 30) : rand.Next(150, 210);
+                                double angleRad = angleDeg * Math.PI / 180.0;
+
+                                int sparkLength = rand.Next(15, 35);
+                                int endX = targetX + (int)(Math.Cos(angleRad) * sparkLength);
+                                int endY = targetY + (int)(Math.Sin(angleRad) * sparkLength);
+
+                                using (Pen sparkPen = new Pen(Color.FromArgb(200, 255, 255, 255), 1.5f))
+                                {
+                                    canvasGraphics.DrawLine(sparkPen, targetX, targetY, endX, endY);
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // 3. KATMAN: Ana Karakter Çizimi
                 if (playerImage != null)

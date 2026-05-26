@@ -62,11 +62,25 @@ namespace KeserKnight.Core
             }
         }
 
+        
         public void HandleGameKeyUp(KeyEventArgs e, Player player)
         {
             if (e.KeyCode == Keys.A) player.MoveLeft = false;
             if (e.KeyCode == Keys.D) player.MoveRight = false;
 
+            
+            // Oyuncu zıplama tuşunu bıraktığı an (Space veya W)
+            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.W)
+            {
+                // Karakter eğer hala yukarı doğru yükseliyorsa (VerticalVelocity negatifse)
+                if (player.IsJumping && player.VerticalVelocity < 0)
+                {
+                    
+                    // Bu değer karakterin havada tık diye süzülüp erken düşmesini sağlar.
+                    player.VerticalVelocity *= 0.4f;
+                }
+            }
+            
         }
 
         // --- ENÜM DESTEKLİ HIZLANDIRILMIŞ METOT ---

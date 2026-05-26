@@ -42,7 +42,7 @@ namespace KeserKnight.Entity
 
         // --- ZIPLAMA VE YERÇEKİMİ SİSTEMİ ---
         public bool IsJumping { get; set; } = false;
-        public int VerticalVelocity { get; set; } = 0;
+        public float VerticalVelocity { get; set; } = 0;
         public int Gravity { get; set; } = 3;
         public int JumpPower { get; set; } = -38;
 
