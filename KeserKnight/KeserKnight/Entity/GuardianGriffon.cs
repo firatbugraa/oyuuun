@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using KeserKnight.Combat;
 
 namespace KeserKnight.Entity
@@ -8,6 +9,9 @@ namespace KeserKnight.Entity
     public class GuardianGriffon
     {
         private int baseOriginX;
+        private int baseOriginY;
+        private int baseWidth;
+        private int baseHeight;
 
         public Rectangle Hitbox { get; private set; }
         public int MaxHealth { get; private set; } = 100;
@@ -19,8 +23,6 @@ namespace KeserKnight.Entity
         public bool IsSwiping { get; private set; } = false;
 
         public List<BossProjectile> Projectiles { get; private set; } = new List<BossProjectile>();
-
-        // YENİ: Aktif ölüm patlama efektleri listesi
         public List<DeathExplosion> Explosions { get; private set; } = new List<DeathExplosion>();
 
         public enum BossState { Idle, FireAttack, SwipeAttack, Recovery, Dead }
@@ -30,37 +32,89 @@ namespace KeserKnight.Entity
         private int cooldownTimer = 0;
         private Random rand = new Random();
 
-        // Animasyon ve Görsel Durum İpuçları
         public bool IsMouthOpen { get; private set; } = false;
         public bool IsTelegraphingSwipe { get; private set; } = false;
         public bool IsExhausted { get; private set; } = false;
 
-        // YENİ: Ölüm animasyon kontrolcüleri
         public bool SequenceFinished { get; private set; } = false;
         private int flashCounter = 0;
 
-        public GuardianGriffon(int x, int y, int width, int height)
+        private Image[] frames;
+        private Image firePoseSprite;
+        private int currentFrame = 0;
+        private int frameTimer = 0;
+        public int AnimationSpeed { get; set; } = 6;
+
+        public GuardianGriffon(int x, int y, int width, int height, Image spriteSheet, Image firePoseSheet)
         {
             Hitbox = new Rectangle(x, y, width, height);
             this.baseOriginX = x;
+            this.baseOriginY = y;
+            this.baseWidth = width;
+            this.baseHeight = height;
+
+            if (firePoseSheet != null)
+            {
+                Bitmap bmpFire = new Bitmap(firePoseSheet);
+                firePoseSprite = CleanGreenEdges(bmpFire);
+            }
+
+            frames = new Image[10];
+            if (spriteSheet != null)
+            {
+                Bitmap bmpSheet = new Bitmap(spriteSheet);
+                bmpSheet = CleanGreenEdges(bmpSheet);
+
+                int frameWidth = bmpSheet.Width / 10;
+                int frameHeight = bmpSheet.Height;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    Bitmap frame = new Bitmap(frameWidth, frameHeight);
+                    using (Graphics g = Graphics.FromImage(frame))
+                    {
+                        g.DrawImage(bmpSheet,
+                            new Rectangle(0, 0, frameWidth, frameHeight),
+                            new Rectangle(i * frameWidth, 0, frameWidth, frameHeight),
+                            GraphicsUnit.Pixel);
+                    }
+                    frames[i] = frame;
+                }
+            }
+        }
+
+        private Bitmap CleanGreenEdges(Bitmap original)
+        {
+            Bitmap cleanBmp = new Bitmap(original.Width, original.Height);
+            for (int y = 0; y < original.Height; y++)
+            {
+                for (int x = 0; x < original.Width; x++)
+                {
+                    Color pixel = original.GetPixel(x, y);
+                    if (pixel.G > 140 && pixel.R < 100 && pixel.B < 100)
+                    {
+                        cleanBmp.SetPixel(x, y, Color.Transparent);
+                    }
+                    else
+                    {
+                        cleanBmp.SetPixel(x, y, pixel);
+                    }
+                }
+            }
+            return cleanBmp;
         }
 
         public void Update(Player player)
         {
-            // Eğer ölüm sekansı tamamen bittiyse motoru yorma, çık usta
             if (SequenceFinished) return;
-
-            // Hasar parlamasını erit
             if (HurtTimer > 0) HurtTimer--;
 
-            // Mevcut aktif mermileri güncelle
             for (int i = Projectiles.Count - 1; i >= 0; i--)
             {
                 Projectiles[i].Update();
                 if (Projectiles[i].Hitbox.X < -50) Projectiles.RemoveAt(i);
             }
 
-            // YENİ: Ölüm patlama parçacıklarını güncelle ve temizle
             for (int i = Explosions.Count - 1; i >= 0; i--)
             {
                 Explosions[i].Update();
@@ -69,18 +123,14 @@ namespace KeserKnight.Entity
 
             stateTimer++;
 
-            // DURUM MAKİNESİ
             switch (CurrentState)
             {
                 case BossState.Dead:
-                    // 💥 RETRO ÖLÜM SEKANSI MOTORU
                     IsSwiping = false; IsMouthOpen = false; IsTelegraphingSwipe = false; IsExhausted = false;
                     SwipeHitbox = Rectangle.Empty;
-                    Projectiles.Clear(); // Ekrandaki tüm mermilerini yok et oyuncu rahatlasın usta
-
+                    Projectiles.Clear();
                     flashCounter++;
 
-                    // Her 5 karede bir boss'un gövdesinde rastgele patlama halkası oluştur
                     if (stateTimer < 90 && flashCounter % 5 == 0)
                     {
                         int rx = rand.Next(Hitbox.X, Hitbox.Right);
@@ -88,15 +138,11 @@ namespace KeserKnight.Entity
                         Explosions.Add(new DeathExplosion(rx, ry));
                     }
 
-                    // Sekans süresi (2 saniye) dolduğunda her şeyi tamamla usta
-                    if (stateTimer >= 120)
-                    {
-                        SequenceFinished = true;
-                    }
-                    return; // Diğer yapay zeka durumlarına geçmesini engelle!
+                    if (stateTimer >= 120) SequenceFinished = true;
+                    return;
 
                 case BossState.Idle:
-                    if (cooldownTimer > 0) { cooldownTimer--; return; }
+                    if (cooldownTimer > 0) { cooldownTimer--; break; }
                     if (stateTimer >= 15)
                     {
                         stateTimer = 0;
@@ -123,34 +169,52 @@ namespace KeserKnight.Entity
                     if (stateTimer < 15)
                     {
                         IsTelegraphingSwipe = true;
-                        Hitbox = new Rectangle(baseOriginX + 25, Hitbox.Y, Hitbox.Width, Hitbox.Height);
+                        Hitbox = new Rectangle(baseOriginX + 25, baseOriginY, baseWidth, baseHeight);
+                        currentFrame = 4;
                     }
                     else if (stateTimer >= 15 && stateTimer < 35)
                     {
-                        IsTelegraphingSwipe = false; IsSwiping = true;
-                        Hitbox = new Rectangle(baseOriginX - 35, Hitbox.Y, Hitbox.Width, Hitbox.Height);
-                        SwipeHitbox = new Rectangle(Hitbox.X - 240, Hitbox.Y + 80, 240, 180);
+                        IsTelegraphingSwipe = false;
+                        IsSwiping = true;
+                        Hitbox = new Rectangle(baseOriginX - 35, baseOriginY, baseWidth + 35, baseHeight);
+
+                        int swipeProgress = stateTimer - 15;
+                        currentFrame = 5 + (swipeProgress / 4);
+                        if (currentFrame > 9) currentFrame = 9;
+
+                        int waveOffset = 80 + (swipeProgress * 15);
+                        SwipeHitbox = new Rectangle(baseOriginX - waveOffset, Hitbox.Y + 80, 240, 180);
                     }
                     else if (stateTimer >= 35)
                     {
                         IsSwiping = false; SwipeHitbox = Rectangle.Empty;
-                        Hitbox = new Rectangle(baseOriginX, Hitbox.Y, Hitbox.Width, Hitbox.Height);
+                        Hitbox = new Rectangle(baseOriginX, baseOriginY, baseWidth, baseHeight);
+                        currentFrame = 9;
                     }
 
                     if (stateTimer >= 50) { stateTimer = 0; CurrentState = BossState.Recovery; }
                     break;
 
                 case BossState.Recovery:
-                    IsExhausted = true;
+                    IsExhausted = true; IsMouthOpen = false;
                     if (stateTimer >= 45) { stateTimer = 0; IsExhausted = false; cooldownTimer = 60; CurrentState = BossState.Idle; }
                     break;
+            }
+
+            if (CurrentState == BossState.Idle || CurrentState == BossState.Recovery)
+            {
+                frameTimer++;
+                if (frameTimer >= AnimationSpeed)
+                {
+                    frameTimer = 0;
+                    currentFrame = (currentFrame == 0) ? 1 : 0;
+                }
             }
         }
 
         public void TakeDamage(int amount)
         {
             if (IsDead || HurtTimer > 0) return;
-
             int finalAmount = IsExhausted ? (int)(amount * 1.5f) : amount;
             CurrentHealth -= finalAmount;
             HurtTimer = 15;
@@ -160,55 +224,53 @@ namespace KeserKnight.Entity
                 CurrentHealth = 0;
                 IsDead = true;
                 CurrentState = BossState.Dead;
-                stateTimer = 0; // Ölüm sekans sayacını sıfırdan başlat usta!
+                stateTimer = 0;
                 flashCounter = 0;
             }
         }
 
         public void Draw(Graphics g)
         {
-            // Eğer ölüm animasyonları bittiyse boss'u ekrandan tamamen sil usta (Fade Out nihayeti)
             if (SequenceFinished) return;
+
+            // Çizim alanı DAİMA sabit. Fiziksel hitbox değişse de resim asla esnemeyecek.
+            Rectangle drawRect = new Rectangle(baseOriginX, baseOriginY, baseWidth, baseHeight);
+
+            GraphicsState state = g.Save();
+            g.TranslateTransform(drawRect.X + drawRect.Width, drawRect.Y);
+            g.ScaleTransform(-1, 1);
+
+            Rectangle mirroredRect = new Rectangle(0, 0, drawRect.Width, drawRect.Height);
 
             if (CurrentState == BossState.Dead)
             {
-                // 1. ÖLÜM YANIP SÖNME EFEKTİ (Flashing Sprite)
-                // Her 4 karede bir görünmez/beyaz/orijinal renk döngüsü
-                if ((flashCounter / 4) % 2 == 0)
-                {
-                    // Kare 90'dan sonra yavaşça karartma filtresi uygula
-                    Brush deathBrush = (stateTimer > 90) ? Brushes.DimGray : Brushes.White;
-                    g.FillRectangle(deathBrush, Hitbox);
-                }
-
-                // Patlama parçacıklarını çizdir
-                foreach (var exp in Explosions)
-                {
-                    exp.Draw(g);
-                }
-                return; // Can barını ve normal gövdeyi çizme usta, öldü çünkü!
+                Brush deathBrush = (stateTimer > 90) ? Brushes.DimGray : Brushes.White;
+                g.FillRectangle(deathBrush, mirroredRect);
+                g.Restore(state);
+                foreach (var exp in Explosions) exp.Draw(g);
+                return;
             }
 
-            // NORMAL DURUM ÇİZİMLERİ (Aynen korundu)
-            Brush bodyBrush = Brushes.Gold;
-            if (HurtTimer > 0) bodyBrush = Brushes.DarkRed;
-            else if (IsTelegraphingSwipe) bodyBrush = Brushes.OrangeRed;
-            else if (IsExhausted) bodyBrush = Brushes.LightGray;
-
-            g.FillRectangle(bodyBrush, Hitbox);
-
-            using (SolidBrush detailBrush = new SolidBrush(Color.FromArgb(200, 140, 0)))
+            if (CurrentState == BossState.FireAttack && firePoseSprite != null)
             {
-                g.FillRectangle(detailBrush, Hitbox.X + 20, Hitbox.Y + 20, 50, 50);
-                Brush eyeBrush = IsExhausted ? Brushes.DimGray : Brushes.Red;
-                g.FillEllipse(eyeBrush, Hitbox.X + 35, Hitbox.Y + 40, 15, 15);
+                g.DrawImage(firePoseSprite, mirroredRect);
+            }
+            else if (frames != null && frames.Length > 0)
+            {
+                g.DrawImage(frames[currentFrame], mirroredRect);
+            }
+            else
+            {
+                g.FillRectangle(Brushes.Gold, mirroredRect);
             }
 
-            if (IsMouthOpen)
+            if (HurtTimer > 0)
             {
-                using (SolidBrush mouthBrush = new SolidBrush(Color.FromArgb(255, 50, 0)))
-                    g.FillRectangle(mouthBrush, Hitbox.X - 20, Hitbox.Y + 65, 30, 35);
+                using (SolidBrush damageFilter = new SolidBrush(Color.FromArgb(120, 255, 0, 0)))
+                    g.FillRectangle(damageFilter, mirroredRect);
             }
+
+            g.Restore(state);
 
             foreach (var proj in Projectiles) proj.Draw(g);
 
@@ -216,12 +278,11 @@ namespace KeserKnight.Entity
             {
                 using (Pen swipePen = new Pen(Color.White, 6f))
                 {
-                    swipePen.StartCap = System.Drawing.Drawing2D.LineCap.Round; swipePen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    swipePen.StartCap = LineCap.Round; swipePen.EndCap = LineCap.Round;
                     g.DrawArc(swipePen, SwipeHitbox.X, SwipeHitbox.Y, SwipeHitbox.Width, SwipeHitbox.Height, 120, 120);
                 }
             }
 
-            // BOSS HEALTH BAR UI
             int barWidth = 600; int barHeight = 25; int barX = (1920 - barWidth) / 2; int barY = 150;
             g.FillRectangle(Brushes.Black, barX, barY, barWidth, barHeight);
             float healthRatio = (float)CurrentHealth / MaxHealth;

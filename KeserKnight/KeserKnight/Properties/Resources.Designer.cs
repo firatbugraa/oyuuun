@@ -83,6 +83,26 @@ namespace KeserKnight.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap boss_fire_pose {
+            get {
+                object obj = ResourceManager.GetObject("boss_fire_pose", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap idle_sheet {
+            get {
+                object obj = ResourceManager.GetObject("idle_sheet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap kalp_bos {
             get {
                 object obj = ResourceManager.GetObject("kalp_bos", resourceCulture);
@@ -96,6 +116,46 @@ namespace KeserKnight.Properties {
         internal static System.Drawing.Bitmap kalp_dolu {
             get {
                 object obj = ResourceManager.GetObject("kalp_dolu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ninja_crouch {
+            get {
+                object obj = ResourceManager.GetObject("ninja_crouch", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ninja_jump {
+            get {
+                object obj = ResourceManager.GetObject("ninja_jump", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ninja_run {
+            get {
+                object obj = ResourceManager.GetObject("ninja_run", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap pence_Griffoth {
+            get {
+                object obj = ResourceManager.GetObject("pence_Griffoth", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

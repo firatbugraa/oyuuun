@@ -122,5 +122,23 @@
   <ItemGroup>
     <None Include="Resources\anakarakterkesik.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ninja_crouch-ezgif.com-crop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\keser_knight_idle_sheet.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ninja_run-ezgif.com-crop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ninja_jump-ezgif.com-crop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pence_Griffoth-removebg-preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\PC___Computer_-_Shovel_Knight__Treasure_Trove_-_Enemies_-_Griffoth.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

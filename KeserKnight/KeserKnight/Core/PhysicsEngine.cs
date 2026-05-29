@@ -9,71 +9,87 @@ namespace KeserKnight.Core
     {
         public void Update(Player player, List<Rectangle> platforms)
         {
-            // 1. Hızları ve Yerçekimini Güncelle usta
+            // 1. Hızları ve Yerçekimini Güncelle
             player.VerticalVelocity += player.Gravity;
             if (player.VerticalVelocity > 25) player.VerticalVelocity = 25; // Terminal Velocity
 
             // 2. Karakterin gitmek istediği bir sonraki X ve Y koordinatını hesapla
             int nextX = player.X;
-            if (player.MoveLeft && !player.MoveRight)
+            bool canMoveHorizontally = true;
+
+            // Yerdeyken çömeliyorsa yatay hareketi kitle
+            if (player.IsCrouching && !player.IsJumping)
             {
-                nextX -= player.Speed;
-                player.CurrentDirection = Player.Direction.Left;
+                canMoveHorizontally = false;
             }
-            else if (player.MoveRight && !player.MoveLeft)
+
+            if (canMoveHorizontally)
             {
-                nextX += player.Speed;
-                player.CurrentDirection = Player.Direction.Right;
-            }
-            else if (player.MoveLeft && player.MoveRight)
-            {
-                if (player.CurrentDirection == Player.Direction.Left) nextX -= player.Speed;
-                else nextX += player.Speed;
+                if (player.MoveLeft && !player.MoveRight)
+                {
+                    nextX -= player.Speed;
+                    player.CurrentDirection = Player.Direction.Left;
+                }
+                else if (player.MoveRight && !player.MoveLeft)
+                {
+                    nextX += player.Speed;
+                    player.CurrentDirection = Player.Direction.Right;
+                }
+                else if (player.MoveLeft && player.MoveRight)
+                {
+                    if (player.CurrentDirection == Player.Direction.Left) nextX -= player.Speed;
+                    else nextX += player.Speed;
+                }
             }
 
             float nextY = player.Y + player.VerticalVelocity;
 
-            // 3. Karakteri doğrudan hedef koordinatına taşı usta (Çift adımdan kurtulduk)
+            // 3. Karakteri hedef koordinatına taşı
             player.X = nextX;
             player.Y = (int)nextY;
 
-            // Havada kalma durumunu başta aktif et, eğer zemine basarsa aşağıda false yapacağız
             player.IsJumping = true;
 
-            // 4. ÇARPIŞMA ÇÖZÜMLEME MOTORU (RESOLVE COLLISION)
-            // Karakter platformun içine girdiyse, onu ışınlamadan milimetrik geri iteceğiz
+            // 4. ÇARPIŞMA ÇÖZÜMLEME MOTORU
             foreach (var platform in platforms)
             {
                 if (player.Hitbox.IntersectsWith(platform))
                 {
-                    // Çakışan alanın (Overlap) genişliğini ve yüksekliğini buluyoruz
                     Rectangle overlap = Rectangle.Intersect(player.Hitbox, platform);
 
-                    // Eğer çakışma dikeyde daha sığsa (Y ekseninden düzeltme yap usta)
+                    // Dikey Çarpışma (Zemin ve Tavan)
                     if (overlap.Width > overlap.Height)
                     {
-                        if (player.VerticalVelocity >= 0 && player.Y < platform.Top) // Zemine basma
+                        if (player.VerticalVelocity >= 0 && player.Hitbox.Bottom - overlap.Height <= platform.Top)
                         {
+                            // İŞTE ÇÖZÜM BURADA: Y eksenini Hitbox'a göre değil, orijinal resim boyuna göre ayarlıyoruz!
                             player.Y = platform.Top - player.Height;
                             player.VerticalVelocity = 0;
                             player.IsJumping = false;
                         }
-                        else if (player.VerticalVelocity < 0 && player.Y > platform.Top) // Kafayı tavana vurma
+                        else if (player.VerticalVelocity < 0 && player.Hitbox.Top + overlap.Height >= platform.Bottom)
                         {
-                            player.Y = platform.Bottom + 1;
+                            // Tavana çarpma durumunda ofseti dinamik hesapla
+                            int topOffset = player.Hitbox.Top - player.Y;
+                            player.Y = platform.Bottom + 1 - topOffset;
                             player.VerticalVelocity = 0;
                         }
                     }
-                    // Eğer çakışma yatayda daha sığsa (X ekseninden duvara it usta - IŞINLANMAYI BİTİREN KISIM)
+                    // Yatay Çarpışma (Duvarlar)
                     else
                     {
-                        if (player.X < platform.X) // Soldan duvara çarpma
+                        // Padding değerini dinamik olarak hesapla (sabit 30 pikselden kurtulduk)
+                        int leftOffset = player.Hitbox.Left - player.X;
+
+                        if (player.Hitbox.Center().X < platform.Center().X)
                         {
-                            player.X = platform.Left - player.Width - 1;
+                            // Soldan duvara çarpma
+                            player.X = platform.Left - player.Hitbox.Width - leftOffset;
                         }
-                        else // Sağdan duvara çarpma
+                        else
                         {
-                            player.X = platform.Right + 1;
+                            // Sağdan duvara çarpma
+                            player.X = platform.Right - leftOffset + 1;
                         }
                     }
                 }
@@ -90,6 +106,15 @@ namespace KeserKnight.Core
                 player.Y = 110;
                 player.VerticalVelocity = 0;
             }
+        }
+    }
+
+    // Dikdörtgenin merkezini bulmak için yardımcı eklenti
+    public static class RectangleExtensions
+    {
+        public static Point Center(this Rectangle rect)
+        {
+            return new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
         }
     }
 }

@@ -27,37 +27,45 @@ namespace KeserKnight.Map
             allMovingPlatforms.Clear();
             allLadders.Clear();
 
-            
-            // ODA 1 - 6: MEVCUT RETRO ALANLAR KORUNDU
-          
             allPlatforms[1] = new List<Rectangle> { new Rectangle(0, 850, 550, 230), new Rectangle(650, 750, 200, 40), new Rectangle(950, 650, 200, 40), new Rectangle(1400, 550, 570, 530) };
-            allEnemies[1] = new List<Enemy> { new Enemy(1500, 420, 130, 130, 80) }; allGolds[1] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(1050, 600, 10, Color.Gold), new Gold(1450, 500, 50, Color.Cyan) }; allBreakableBlocks[1] = new List<BreakableBlock>(); allTimedBlocks[1] = new List<TimedBlock>(); allMovingPlatforms[1] = new List<MovingPlatform>(); allLadders[1] = new List<Rectangle>();
+            allEnemies[1] = new List<Enemy> { new Enemy(1500, 420, 130, 130, 80) };
+            allGolds[1] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(1050, 600, 10, Color.Gold), new Gold(1450, 500, 50, Color.Cyan) };
+            allBreakableBlocks[1] = new List<BreakableBlock>(); allTimedBlocks[1] = new List<TimedBlock>(); allMovingPlatforms[1] = new List<MovingPlatform>(); allLadders[1] = new List<Rectangle>();
 
             allPlatforms[2] = new List<Rectangle> { new Rectangle(-20, 550, 420, 530), new Rectangle(550, 750, 800, 50), new Rectangle(1500, 650, 420, 630) };
-            allEnemies[2] = new List<Enemy> { new Enemy(700, 690, 60, 60, 120), new Enemy(1100, 690, 60, 60, 100) }; allGolds[2] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(950, 700, 50, Color.Cyan), new Gold(1150, 700, 10, Color.Gold) }; allBreakableBlocks[2] = new List<BreakableBlock>(); allTimedBlocks[2] = new List<TimedBlock>(); allMovingPlatforms[2] = new List<MovingPlatform>(); allLadders[2] = new List<Rectangle>();
+            // Düşmanlar 130x130 yapıldı, zemine (750-130 = 620) oturtuldu
+            allEnemies[2] = new List<Enemy> { new Enemy(700, 620, 130, 130, 120), new Enemy(1100, 620, 130, 130, 100) };
+            allGolds[2] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(950, 700, 50, Color.Cyan), new Gold(1150, 700, 10, Color.Gold) };
+            allBreakableBlocks[2] = new List<BreakableBlock>(); allTimedBlocks[2] = new List<TimedBlock>(); allMovingPlatforms[2] = new List<MovingPlatform>(); allLadders[2] = new List<Rectangle>();
 
             allPlatforms[3] = new List<Rectangle> { new Rectangle(0, 650, 400, 430), new Rectangle(400, 1020, 1520, 60), new Rectangle(480, 850, 350, 40), new Rectangle(580, 650, 650, 40), new Rectangle(1280, 800, 400, 40), new Rectangle(1450, 450, 470, 630) };
-            allEnemies[3] = new List<Enemy> { new Enemy(650, 590, 60, 60, 120), new Enemy(950, 590, 60, 60, 100) }; allGolds[3] = new List<Gold> { new Gold(550, 800, 10, Color.Gold), new Gold(900, 590, 50, Color.Cyan), new Gold(1600, 390, 50, Color.Cyan) }; allBreakableBlocks[3] = new List<BreakableBlock>(); allTimedBlocks[3] = new List<TimedBlock>(); allMovingPlatforms[3] = new List<MovingPlatform>(); allLadders[3] = new List<Rectangle>();
+            // Düşmanlar 130x130 yapıldı, zemine (650-130 = 520) oturtuldu
+            allEnemies[3] = new List<Enemy> { new Enemy(650, 520, 130, 130, 120), new Enemy(950, 520, 130, 130, 100) };
+            allGolds[3] = new List<Gold> { new Gold(550, 800, 10, Color.Gold), new Gold(900, 590, 50, Color.Cyan), new Gold(1600, 390, 50, Color.Cyan) };
+            allBreakableBlocks[3] = new List<BreakableBlock>(); allTimedBlocks[3] = new List<TimedBlock>(); allMovingPlatforms[3] = new List<MovingPlatform>(); allLadders[3] = new List<Rectangle>();
 
             allPlatforms[4] = new List<Rectangle> { new Rectangle(0, 580, 300, 500), new Rectangle(300, 720, 200, 360), new Rectangle(500, 680, 150, 400), new Rectangle(650, 580, 150, 500), new Rectangle(800, 850, 600, 230), new Rectangle(1400, 720, 520, 360), new Rectangle(0, 0, 400, 300), new Rectangle(950, 0, 970, 280) };
-            allBreakableBlocks[4] = new List<BreakableBlock> { new BreakableBlock(1280, 720, 120, 130), new BreakableBlock(1280, 590, 120, 130) }; allEnemies[4] = new List<Enemy> { new Enemy(950, 720, 130, 130, 100) }; allGolds[4] = new List<Gold> { new Gold(1550, 620, 50, Color.Cyan), new Gold(150, 480, 10, Color.Gold) }; allTimedBlocks[4] = new List<TimedBlock>(); allMovingPlatforms[4] = new List<MovingPlatform>(); allLadders[4] = new List<Rectangle>();
+            allBreakableBlocks[4] = new List<BreakableBlock> { new BreakableBlock(1280, 720, 120, 130), new BreakableBlock(1280, 590, 120, 130) };
+            allEnemies[4] = new List<Enemy> { new Enemy(950, 720, 130, 130, 100) };
+            allGolds[4] = new List<Gold> { new Gold(1550, 620, 50, Color.Cyan), new Gold(150, 480, 10, Color.Gold) };
+            allTimedBlocks[4] = new List<TimedBlock>(); allMovingPlatforms[4] = new List<MovingPlatform>(); allLadders[4] = new List<Rectangle>();
 
             allPlatforms[5] = new List<Rectangle> { new Rectangle(0, 720, 500, 360), new Rectangle(500, 850, 450, 230), new Rectangle(950, 550, 970, 530), new Rectangle(1010, 250, 910, 60), new Rectangle(0, 200, 950, 60) };
-            allTimedBlocks[5] = new List<TimedBlock> { new TimedBlock(650, 620, 160, 50, 0) }; allEnemies[5] = new List<Enemy>(); allGolds[5] = new List<Gold> { new Gold(720, 520, 10, Color.Gold) }; allBreakableBlocks[5] = new List<BreakableBlock>(); allMovingPlatforms[5] = new List<MovingPlatform>(); allLadders[5] = new List<Rectangle> { new Rectangle(950, 200, 60, 880) };
+            allTimedBlocks[5] = new List<TimedBlock> { new TimedBlock(650, 620, 160, 50, 0) };
+            allEnemies[5] = new List<Enemy>();
+            allGolds[5] = new List<Gold> { new Gold(720, 520, 10, Color.Gold) };
+            allBreakableBlocks[5] = new List<BreakableBlock>(); allMovingPlatforms[5] = new List<MovingPlatform>(); allLadders[5] = new List<Rectangle> { new Rectangle(950, 200, 60, 880) };
 
             allPlatforms[6] = new List<Rectangle> { new Rectangle(0, 250, 600, 60), new Rectangle(600, 500, 400, 40), new Rectangle(1000, 750, 920, 330), new Rectangle(0, 0, 1920, 100) };
-            allBreakableBlocks[6] = new List<BreakableBlock>(); allTimedBlocks[6] = new List<TimedBlock>(); allEnemies[6] = new List<Enemy> { new Enemy(1200, 620, 130, 130, 100) }; allGolds[6] = new List<Gold> { new Gold(780, 420, 50, Color.Cyan) }; allMovingPlatforms[6] = new List<MovingPlatform>(); allLadders[6] = new List<Rectangle> { new Rectangle(950, 500, 60, 580) };
+            allBreakableBlocks[6] = new List<BreakableBlock>(); allTimedBlocks[6] = new List<TimedBlock>();
+            allEnemies[6] = new List<Enemy> { new Enemy(1200, 620, 130, 130, 100) };
+            allGolds[6] = new List<Gold> { new Gold(780, 420, 50, Color.Cyan) };
+            allMovingPlatforms[6] = new List<MovingPlatform>(); allLadders[6] = new List<Rectangle> { new Rectangle(950, 500, 60, 580) };
 
-            
-            // ODA 7: 
-            
             allPlatforms[7] = new List<Rectangle> { new Rectangle(0, 450, 350, 630), new Rectangle(1550, 450, 370, 630), new Rectangle(0, 1020, 1920, 60), new Rectangle(0, 0, 1920, 100) };
-            allMovingPlatforms[7] = new List<MovingPlatform> {
-                new MovingPlatform(500, 650, 250, 50, 600, MovingPlatform.MovementType.Horizontal)
-            };
+            allMovingPlatforms[7] = new List<MovingPlatform> { new MovingPlatform(500, 650, 250, 50, 600, MovingPlatform.MovementType.Horizontal) };
             allEnemies[7] = new List<Enemy>(); allGolds[7] = new List<Gold> { new Gold(900, 500, 10, Color.Gold) }; allBreakableBlocks[7] = new List<BreakableBlock>(); allTimedBlocks[7] = new List<TimedBlock>(); allLadders[7] = new List<Rectangle>();
 
-            // ODA 8 VE ODA 9
             allPlatforms[8] = new List<Rectangle> { new Rectangle(0, 850, 1750, 230), new Rectangle(1750, 0, 170, 1080), new Rectangle(0, 0, 1920, 100) };
             allEnemies[8] = new List<Enemy>(); allGolds[8] = new List<Gold>(); allBreakableBlocks[8] = new List<BreakableBlock>(); allTimedBlocks[8] = new List<TimedBlock>(); allMovingPlatforms[8] = new List<MovingPlatform>(); allLadders[8] = new List<Rectangle> { new Rectangle(1715, 850, 35, 230) };
 
@@ -65,34 +73,22 @@ namespace KeserKnight.Map
             allTimedBlocks[9] = new List<TimedBlock> { new TimedBlock(500, 720, 160, 50, 0), new TimedBlock(750, 620, 160, 50, 45), new TimedBlock(1000, 520, 160, 50, 0), new TimedBlock(1250, 480, 160, 50, 45) };
             allEnemies[9] = new List<Enemy>(); allGolds[9] = new List<Gold> { new Gold(830, 500, 50, Color.Cyan), new Gold(1100, 400, 50, Color.Cyan) }; allBreakableBlocks[9] = new List<BreakableBlock>(); allMovingPlatforms[9] = new List<MovingPlatform>(); allLadders[9] = new List<Rectangle>();
 
-            // ODA 10 VE ODA 11
             allPlatforms[10] = new List<Rectangle> { new Rectangle(0, 880, 1700, 200), new Rectangle(200, 580, 1720, 60), new Rectangle(0, 280, 1920, 60), new Rectangle(0, 0, 1920, 100) };
-            allLadders[10] = new List<Rectangle> { new Rectangle(1650, 580, 50, 300), new Rectangle(200, 280, 50, 300) }; allEnemies[10] = new List<Enemy> { new Enemy(600, 450, 130, 130, 100), new Enemy(1100, 450, 130, 130, 120) }; allGolds[10] = new List<Gold> { new Gold(850, 200, 50, Color.Cyan) }; allBreakableBlocks[10] = new List<BreakableBlock>(); allTimedBlocks[10] = new List<TimedBlock>(); allMovingPlatforms[10] = new List<MovingPlatform>();
+            allLadders[10] = new List<Rectangle> { new Rectangle(1650, 580, 50, 300), new Rectangle(200, 280, 50, 300) };
+            allEnemies[10] = new List<Enemy> { new Enemy(600, 450, 130, 130, 100), new Enemy(1100, 450, 130, 130, 120) };
+            allGolds[10] = new List<Gold> { new Gold(850, 200, 50, Color.Cyan) };
+            allBreakableBlocks[10] = new List<BreakableBlock>(); allTimedBlocks[10] = new List<TimedBlock>(); allMovingPlatforms[10] = new List<MovingPlatform>();
 
             allPlatforms[11] = new List<Rectangle> { new Rectangle(0, 650, 400, 430), new Rectangle(700, 450, 1220, 630), new Rectangle(0, 0, 1920, 100) };
             allTimedBlocks[11] = new List<TimedBlock> { new TimedBlock(480, 530, 160, 50, 0) };
-            allEnemies[11] = new List<Enemy> { new Enemy(1200, 320, 130, 130, 100) }; allGolds[11] = new List<Gold> { new Gold(1600, 350, 50, Color.Cyan) }; allBreakableBlocks[11] = new List<BreakableBlock>(); allMovingPlatforms[11] = new List<MovingPlatform>(); allLadders[11] = new List<Rectangle>();
+            allEnemies[11] = new List<Enemy> { new Enemy(1200, 320, 130, 130, 100) };
+            allGolds[11] = new List<Gold> { new Gold(1600, 350, 50, Color.Cyan) };
+            allBreakableBlocks[11] = new List<BreakableBlock>(); allMovingPlatforms[11] = new List<MovingPlatform>(); allLadders[11] = new List<Rectangle>();
 
-           
-            //  ODA 12: YENİ KRALİYET SARAYI MİNİ BOSS ARENASI (SAFA HİZALANDI)
-            
-            allPlatforms[12] = new List<Rectangle> {
-                new Rectangle(0, 840, 1920, 240),         // Düz, engelsiz saray suru zemini 
-                new Rectangle(0, 0, 1920, 100)           // Tavan sınırı
-            };
-
-            allEnemies[12] = new List<Enemy> {
-                new Enemy(1000, 710, 130, 130, 130)      // Geniş alanda devriye atan güçlü şövalye mini boss'u
-            };
-
-            allGolds[12] = new List<Gold> {
-                new Gold(1700, 740, 50, Color.Cyan),
-                new Gold(200, 740, 50, Color.Cyan)
-            };
-            allBreakableBlocks[12] = new List<BreakableBlock>();
-            allTimedBlocks[12] = new List<TimedBlock>();
-            allMovingPlatforms[12] = new List<MovingPlatform>();
-            allLadders[12] = new List<Rectangle>();
+            allPlatforms[12] = new List<Rectangle> { new Rectangle(0, 840, 1920, 240), new Rectangle(0, 0, 1920, 100) };
+            allEnemies[12] = new List<Enemy> { new Enemy(1000, 710, 130, 130, 130) };
+            allGolds[12] = new List<Gold> { new Gold(1700, 740, 50, Color.Cyan), new Gold(200, 740, 50, Color.Cyan) };
+            allBreakableBlocks[12] = new List<BreakableBlock>(); allTimedBlocks[12] = new List<TimedBlock>(); allMovingPlatforms[12] = new List<MovingPlatform>(); allLadders[12] = new List<Rectangle>();
 
             isInitialized = true;
         }
@@ -149,7 +145,11 @@ namespace KeserKnight.Map
 
         public static GuardianGriffon GetBossInstance(int roomNumber)
         {
-            if (roomNumber == 8) return new GuardianGriffon(1450, 520, 250, 330);
+            if (roomNumber == 8) return new GuardianGriffon(
+                1450, 520, 250, 330,
+                Properties.Resources.pence_Griffoth,
+                Properties.Resources.boss_fire_pose
+            );
             return null;
         }
 

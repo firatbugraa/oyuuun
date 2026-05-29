@@ -152,8 +152,31 @@ namespace KeserKnight
             }
             else { foreach (var platform in platforms) { if (platform.Y >= player.Hitbox.Bottom - 5) tempPhysicalPlatforms.Add(platform); } }
             Form1.GlobalPlatforms = tempPhysicalPlatforms;
+            player.IsCrouching = (GetAsyncKeyState((int)Keys.S) & 0x8000) != 0;
 
-            player.Update(); physicsEngine.Update(player, tempPhysicalPlatforms);
+            if (player.IsCrouching)
+            {
+                player.MoveLeft = false;
+                player.MoveRight = false;
+            }
+
+            player.Update(); 
+            physicsEngine.Update(player, tempPhysicalPlatforms);
+
+            foreach (var platform in tempPhysicalPlatforms)
+            {
+                if (platform.Height > 150 && player.Hitbox.IntersectsWith(platform))
+                {
+                    if (player.Hitbox.Right > platform.Left && player.Hitbox.Left < platform.Left)
+                    {
+                        player.X = platform.Left - player.Width + 30; // 30, paddingX değerin
+                    }
+                    else if (player.Hitbox.Left < platform.Right && player.Hitbox.Right > platform.Right)
+                    {
+                        player.X = platform.Right - 30;
+                    }
+                }
+            }
 
             if (player.Y > 1020) { if (isGodMode) { player.X = 150; player.Y = 100; player.VerticalVelocity = 0; } else { isGameOver = true; this.Invalidate(); return; } }
 
@@ -206,7 +229,7 @@ namespace KeserKnight
             Bitmap oldRoomImg = new Bitmap(virtualCanvas); SyncLoadRoom();
             PaintEventArgs fakePaint = new PaintEventArgs(this.CreateGraphics(), this.ClientRectangle); Form1_Paint(this, fakePaint);
             Bitmap newRoomImg = new Bitmap(virtualCanvas);
-            int scrollSpeed = 60; bool scrollLeft = (player.X < targetWidth / 2);
+            int scrollSpeed = 100; bool scrollLeft = (player.X < targetWidth / 2);
 
             for (int offset = 0; offset <= targetWidth; offset += scrollSpeed)
             {
@@ -217,7 +240,6 @@ namespace KeserKnight
                     else { g.DrawImage(oldRoomImg, offset, 0); g.DrawImage(newRoomImg, -targetWidth + offset, 0); }
                 }
                 using (Graphics formGraphics = this.CreateGraphics()) { formGraphics.InterpolationMode = InterpolationMode.NearestNeighbor; formGraphics.DrawImage(virtualCanvas, 0, 0, this.ClientSize.Width, this.ClientSize.Height); }
-                System.Threading.Thread.Sleep(1);
             }
             oldRoomImg.Dispose(); newRoomImg.Dispose(); this.Focus();
         }
@@ -270,13 +292,31 @@ namespace KeserKnight
                 foreach (var enemy in enemies) enemy.Draw(canvasGraphics);
                 if (miniBoss != null) miniBoss.Draw(canvasGraphics);
 
-                if (playerImage != null)
+                // --- KARAKTER ANİMASYON ÇİZİMİ ---
+                Image currentSprite = player.GetCurrentFrameImage();
+                if (currentSprite != null)
                 {
-                    Rectangle drawRect = new Rectangle(player.Hitbox.X, player.Hitbox.Y, player.Hitbox.Width, player.Hitbox.Height);
-                    if (player.CurrentDirection == Player.Direction.Left) { GraphicsState state = canvasGraphics.Save(); canvasGraphics.TranslateTransform(drawRect.X + drawRect.Width, drawRect.Y); canvasGraphics.ScaleTransform(-1, 1); canvasGraphics.DrawImage(playerImage, 0, 0, drawRect.Width, drawRect.Height); canvasGraphics.Restore(state); }
-                    else canvasGraphics.DrawImage(playerImage, drawRect);
+                    // Hitbox'tan bağımsız olarak gerçek karakter boyutlarında çiziyoruz (Padding koruması)
+                    Rectangle drawRect = new Rectangle(player.X, player.Y, player.Width, player.Height);
+
+                    if (player.CurrentDirection == Player.Direction.Left)
+                    {
+                        GraphicsState state = canvasGraphics.Save();
+                        canvasGraphics.TranslateTransform(drawRect.X + drawRect.Width, drawRect.Y);
+                        canvasGraphics.ScaleTransform(-1, 1);
+                        canvasGraphics.DrawImage(currentSprite, 0, 0, drawRect.Width, drawRect.Height);
+                        canvasGraphics.Restore(state);
+                    }
+                    else
+                    {
+                        canvasGraphics.DrawImage(currentSprite, drawRect);
+                    }
                 }
-                else canvasGraphics.FillRectangle(Brushes.Black, player.Hitbox);
+                else
+                {
+                    // Resim yüklenemezse fallback olarak siyah kutu çiz
+                    canvasGraphics.FillRectangle(Brushes.Black, player.Hitbox);
+                }
 
                 if (player.IsAttacking && !player.AttackHitbox.IsEmpty)
                 {
@@ -302,9 +342,24 @@ namespace KeserKnight
 
         public Form1()
         {
-            InitializeComponent(); GameMap.InitializeWorld(); virtualCanvas = new Bitmap(targetWidth, targetHeight); canvasGraphics = Graphics.FromImage(virtualCanvas); SetScreenMode(true);
-            player = new Player(300, 750, 130, 130); physicsEngine = new PhysicsEngine(); attackSystem = new AttackSystem(); roomManager = new RoomManager(targetWidth, targetHeight); inputManager = new InputManager();
-            this.DoubleBuffered = true; this.MaximizeBox = false; this.KeyPreview = true; this.Focus(); SyncLoadRoom();
+            InitializeComponent(); 
+            GameMap.InitializeWorld(); virtualCanvas = new Bitmap(targetWidth, targetHeight);
+            canvasGraphics = Graphics.FromImage(virtualCanvas); 
+            SetScreenMode(true);
+            player = new Player(300, 750, 130, 130,
+            Properties.Resources.idle_sheet,
+            Properties.Resources.ninja_run,
+            Properties.Resources.ninja_jump,
+            Properties.Resources.ninja_crouch);
+            physicsEngine = new PhysicsEngine();
+            attackSystem = new AttackSystem(); 
+            roomManager = new RoomManager(targetWidth, targetHeight); 
+            inputManager = new InputManager();
+            this.DoubleBuffered = true; 
+            this.MaximizeBox = false; 
+            this.KeyPreview = true;
+            this.Focus(); 
+            SyncLoadRoom();
         }
     }
 }
