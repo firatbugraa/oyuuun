@@ -8,7 +8,6 @@ namespace KeserKnight.Map
     public class RoomManager
     {
         public int CurrentRoom { get; private set; } = 1;
-
         private readonly int mapWidth;
         private readonly int mapHeight;
 
@@ -18,53 +17,50 @@ namespace KeserKnight.Map
             this.mapHeight = targetHeight;
         }
 
-        // Oyun resetlendiğinde odayı başa sarmak için
-        public void Reset()
-        {
-            CurrentRoom = 1;
-        }
+        public void Reset() { CurrentRoom = 1; }
 
-        // Oda geçiş sınırlarını denetleyen ve haritayı güncelleyen ana fonksiyon
-        // Geriye 'bool' döndürerek Form1'e "Oda değişti, ekranı tazeleyebilirsin" mesajı verir usta
-        public bool Update(Player player, List<Rectangle> platforms, List<Enemy> enemies, List<Gold> roomGolds)
+        public bool Update(Player player, List<Rectangle> platforms, List<Enemy> enemies, List<Gold> roomGolds, List<BreakableBlock> roomBlocks, List<TimedBlock> timedBlocks, List<MovingPlatform> movingPlatforms, out List<Rectangle> roomLadders)
         {
-            // --- SAĞDAN ODA GEÇİŞ KONTROLÜ ---
+            roomLadders = new List<Rectangle>();
+
             if (player.X > mapWidth)
             {
-                // Gitmeden önce şu anki odanın temizlenmiş halini hafızaya mühürle usta!
-                GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds);
-
+                GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds, roomBlocks);
                 CurrentRoom++;
-                player.X = 10;
 
-                // Şimdi yeni odayı yükle
-                GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds);
+                if (CurrentRoom == 6) player.Y = 250 - player.Height - 5;
+                else if (CurrentRoom == 7) player.Y = 450 - player.Height - 5;
+                else if (CurrentRoom == 8) player.Y = 850 - player.Height - 5;
+                // Oda 9'un yeni sol zemin yüksekliği usta
+                else if (CurrentRoom == 9) player.Y = 850 - player.Height - 5;
+                else if (CurrentRoom == 10) player.Y = 880 - player.Height - 5;
+                else if (CurrentRoom == 11) player.Y = 650 - player.Height - 5;
+
+                player.X = 10;
+                GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds, roomBlocks, timedBlocks, movingPlatforms, out roomLadders);
                 return true;
             }
-
-            // --- SOLDAN ODA GEÇİŞ KONTROLÜ ---
             else if (player.X + player.Width < 0)
             {
                 if (CurrentRoom > 1)
                 {
-                    // Gitmeden önce şu anki odanın temizlenmiş halini hafızaya mühürle usta!
-                    GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds);
-
+                    GameMap.SaveRoomState(CurrentRoom, enemies, roomGolds, roomBlocks);
                     CurrentRoom--;
-                    player.X = mapWidth - player.Width - 15;
 
-                    // Şimdi eski odayı yükle (Bıraktığımız gibi gelecek!)
-                    GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds);
+                    if (CurrentRoom == 5) player.Y = 250 - player.Height - 5;
+                    else if (CurrentRoom == 6) player.Y = 750 - player.Height - 5;
+                    else if (CurrentRoom == 7) player.Y = 450 - player.Height - 5;
+                    else if (CurrentRoom == 8) player.Y = 850 - player.Height - 5;
+                    else if (CurrentRoom == 9) player.Y = 450 - player.Height - 5; // Ondan dokuza dönerse sağ yüksek kata koy
+                    else if (CurrentRoom == 10) player.Y = 280 - player.Height - 5;
+
+                    player.X = mapWidth - player.Width - 15;
+                    GameMap.LoadRoom(CurrentRoom, platforms, enemies, roomGolds, roomBlocks, timedBlocks, movingPlatforms, out roomLadders);
                     return true;
                 }
-                else
-                {
-                    player.X = 0;
-                }
+                else player.X = 0;
             }
-
             return false;
         }
-
     }
 }
