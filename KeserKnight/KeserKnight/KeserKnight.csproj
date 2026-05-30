@@ -52,11 +52,13 @@
     <Compile Include="Entity\BossProjectile.cs" />
     <Compile Include="Entity\BreakableBlock.cs" />
     <Compile Include="Entity\CheckpointTorch.cs" />
+    <Compile Include="Entity\CrimsonKnight.cs" />
     <Compile Include="Entity\DeathExplosion.cs" />
     <Compile Include="Entity\Enemy.cs" />
     <Compile Include="Entity\GuardianGriffon.cs" />
     <Compile Include="Entity\MovingPlatform.cs" />
     <Compile Include="Entity\Player.cs" />
+    <Compile Include="Entity\RoyalShieldKnight.cs" />
     <Compile Include="Entity\TimedBlock.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

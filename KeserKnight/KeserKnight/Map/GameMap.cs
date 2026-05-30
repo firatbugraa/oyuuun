@@ -7,6 +7,7 @@ namespace KeserKnight.Map
 {
     public static class GameMap
     {
+        // Tüm odaların nesne verilerini hafızada tutan ana sözlük yapıları (Bellek optimizasyonu sağlar)
         private static Dictionary<int, List<Rectangle>> allPlatforms = new Dictionary<int, List<Rectangle>>();
         private static Dictionary<int, List<Enemy>> allEnemies = new Dictionary<int, List<Enemy>>();
         private static Dictionary<int, List<Gold>> allGolds = new Dictionary<int, List<Gold>>();
@@ -19,6 +20,7 @@ namespace KeserKnight.Map
 
         public static void InitializeWorld()
         {
+            // Dünya sıfırlandığında eski verilerin üst üste binmemesi için listeleri temizliyoruz
             allPlatforms.Clear();
             allEnemies.Clear();
             allGolds.Clear();
@@ -27,19 +29,18 @@ namespace KeserKnight.Map
             allMovingPlatforms.Clear();
             allLadders.Clear();
 
+            // ODA 1 - 13: Önceki aşamalarda kurulan platform ve düşman yerleşimleri
             allPlatforms[1] = new List<Rectangle> { new Rectangle(0, 850, 550, 230), new Rectangle(650, 750, 200, 40), new Rectangle(950, 650, 200, 40), new Rectangle(1400, 550, 570, 530) };
             allEnemies[1] = new List<Enemy> { new Enemy(1500, 420, 130, 130, 80) };
             allGolds[1] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(1050, 600, 10, Color.Gold), new Gold(1450, 500, 50, Color.Cyan) };
             allBreakableBlocks[1] = new List<BreakableBlock>(); allTimedBlocks[1] = new List<TimedBlock>(); allMovingPlatforms[1] = new List<MovingPlatform>(); allLadders[1] = new List<Rectangle>();
 
             allPlatforms[2] = new List<Rectangle> { new Rectangle(-20, 550, 420, 530), new Rectangle(550, 750, 800, 50), new Rectangle(1500, 650, 420, 630) };
-            // Düşmanlar 130x130 yapıldı, zemine (750-130 = 620) oturtuldu
             allEnemies[2] = new List<Enemy> { new Enemy(700, 620, 130, 130, 120), new Enemy(1100, 620, 130, 130, 100) };
             allGolds[2] = new List<Gold> { new Gold(750, 700, 10, Color.Gold), new Gold(950, 700, 50, Color.Cyan), new Gold(1150, 700, 10, Color.Gold) };
             allBreakableBlocks[2] = new List<BreakableBlock>(); allTimedBlocks[2] = new List<TimedBlock>(); allMovingPlatforms[2] = new List<MovingPlatform>(); allLadders[2] = new List<Rectangle>();
 
             allPlatforms[3] = new List<Rectangle> { new Rectangle(0, 650, 400, 430), new Rectangle(400, 1020, 1520, 60), new Rectangle(480, 850, 350, 40), new Rectangle(580, 650, 650, 40), new Rectangle(1280, 800, 400, 40), new Rectangle(1450, 450, 470, 630) };
-            // Düşmanlar 130x130 yapıldı, zemine (650-130 = 520) oturtuldu
             allEnemies[3] = new List<Enemy> { new Enemy(650, 520, 130, 130, 120), new Enemy(950, 520, 130, 130, 100) };
             allGolds[3] = new List<Gold> { new Gold(550, 800, 10, Color.Gold), new Gold(900, 590, 50, Color.Cyan), new Gold(1600, 390, 50, Color.Cyan) };
             allBreakableBlocks[3] = new List<BreakableBlock>(); allTimedBlocks[3] = new List<TimedBlock>(); allMovingPlatforms[3] = new List<MovingPlatform>(); allLadders[3] = new List<Rectangle>();
@@ -90,6 +91,48 @@ namespace KeserKnight.Map
             allGolds[12] = new List<Gold> { new Gold(1700, 740, 50, Color.Cyan), new Gold(200, 740, 50, Color.Cyan) };
             allBreakableBlocks[12] = new List<BreakableBlock>(); allTimedBlocks[12] = new List<TimedBlock>(); allMovingPlatforms[12] = new List<MovingPlatform>(); allLadders[12] = new List<Rectangle>();
 
+            allPlatforms[13] = new List<Rectangle>
+            {
+                new Rectangle(0, 480, 450, 600),
+                new Rectangle(1450, 480, 470, 600),
+                new Rectangle(1450, 480, 100, 40),
+                new Rectangle(1550, 560, 100, 40),
+                new Rectangle(1650, 640, 100, 40),
+                new Rectangle(1750, 720, 170, 360),
+                new Rectangle(0, 0, 1920, 100)
+            };
+            allMovingPlatforms[13] = new List<MovingPlatform> { new MovingPlatform(500, 600, 200, 45, 400, MovingPlatform.MovementType.Horizontal) };
+            allTimedBlocks[13] = new List<TimedBlock> { new TimedBlock(1150, 550, 160, 45, 0) };
+            allEnemies[13] = new List<Enemy>();
+            allGolds[13] = new List<Gold> { new Gold(600, 450, 50, Color.Cyan), new Gold(1230, 420, 10, Color.Gold) };
+            allBreakableBlocks[13] = new List<BreakableBlock>(); allLadders[13] = new List<Rectangle>();
+
+            allPlatforms[14] = new List<Rectangle>
+            {
+                new Rectangle(0, 870, 550, 210),
+                new Rectangle(550, 710, 420, 370),
+                new Rectangle(970, 790, 300, 290),
+                new Rectangle(1270, 870, 650, 210),
+                new Rectangle(0, 0, 1920, 100)
+            };
+            allEnemies[14] = new List<Enemy>();
+            allGolds[14] = new List<Gold> { new Gold(760, 620, 50, Color.Cyan) };
+            allBreakableBlocks[14] = new List<BreakableBlock>(); allTimedBlocks[14] = new List<TimedBlock>(); allMovingPlatforms[14] = new List<MovingPlatform>(); allLadders[14] = new List<Rectangle>();
+
+            // ODA 15: ANA BOSS ARENASI DÜMDÜZ SAVAŞ YOLU
+            // Oyuncunun ve patronun yeteneklerini tam sergileyebilmesi için hiçbir platform engeli içermez.
+            allPlatforms[15] = new List<Rectangle>
+            {
+                new Rectangle(0, 870, 1920, 210),       // Ekranın solundan sağına uzanan tek parça arena zemini
+                new Rectangle(0, 0, 1920, 100)          // Tavandaki üst sınır bloğu
+            };
+            allEnemies[15] = new List<Enemy>();         // Yapay zeka ajanını Form1 içerisinden özel olarak besleyeceğiz
+            allGolds[15] = new List<Gold>();
+            allBreakableBlocks[15] = new List<BreakableBlock>();
+            allTimedBlocks[15] = new List<TimedBlock>();
+            allMovingPlatforms[15] = new List<MovingPlatform>();
+            allLadders[15] = new List<Rectangle>();
+
             isInitialized = true;
         }
 
@@ -130,6 +173,7 @@ namespace KeserKnight.Map
                 {
                     int distance = 600;
                     if (roomNumber == 10) distance = (mp.Type == MovingPlatform.MovementType.Vertical) ? 450 : 550;
+                    if (roomNumber == 13) distance = 400;
                     activeMovingPlatforms.Add(new MovingPlatform(mp.Hitbox.X, mp.Hitbox.Y, mp.Hitbox.Width, mp.Hitbox.Height, distance, mp.Type));
                 }
             }

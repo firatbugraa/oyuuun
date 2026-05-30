@@ -30,19 +30,24 @@ namespace KeserKnight.Entity
         public int Gravity { get; set; } = 3;
         public int JumpPower { get; set; } = -38;
 
-        public int MaxHealth { get; set; } = 3;
-        public int CurrentHealth { get; set; } = 3;
+        public int MaxHealth { get; set; } = 5;
+        public int CurrentHealth { get; set; } = 5;
 
         public bool IsInvincible { get; set; } = false;
         public int InvincibilityTimer { get; set; } = 0;
-        public int InvincibilityDuration { get; set; } = 40;
+        public int InvincibilityDuration { get; set; } = 60;
 
+        public int KnockbackTimer { get; private set; } = 0;
+        public int KnockbackDirection { get; private set; } = 0;
+
+        // Setter disaridan erisilebilir hale getirildi
         public bool IsAttacking { get; set; } = false;
         public int AttackTimer { get; set; } = 0;
         public int AttackDuration { get; set; } = 15;
         public Rectangle AttackHitbox { get; set; }
 
-        // --- İŞTE ÇÖZÜM BURADA: Gerçek boyutu ve Y eksenini değiştiriyoruz ---
+        public int AttackCooldownTimer { get; set; } = 0;
+
         private bool _isCrouching = false;
         public bool IsCrouching
         {
@@ -52,24 +57,24 @@ namespace KeserKnight.Entity
                 if (_isCrouching != value)
                 {
                     _isCrouching = value;
-                    int crouchOffset = 30; // 30 Piksel tepeden bastırıyoruz
+                    int crouchOffset = 30;
 
                     if (_isCrouching)
                     {
-                        _y += crouchOffset;      // Aşağı kaydır ki ayaklar yere bassın
-                        _height -= crouchOffset; // Boyu kısalt ki tepeden basık görünsün
+                        _y += crouchOffset;
+                        _height -= crouchOffset;
                     }
                     else
                     {
-                        _y -= crouchOffset;      // Ayağa kalktığında Y'yi eski yerine al
-                        _height += crouchOffset; // Boyu eski haline getir
+                        _y -= crouchOffset;
+                        _height += crouchOffset;
                     }
                     UpdateHitbox();
                 }
             }
         }
 
-        public enum PlayerState { Idle, Run, Jump, Crouch }
+        public enum PlayerState { Idle, Run, Jump, Crouch, HitStun }
         public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
         private PlayerState _previousState = PlayerState.Idle;
 
@@ -122,7 +127,6 @@ namespace KeserKnight.Entity
         private void UpdateHitbox()
         {
             int paddingX = 30;
-            // Hitbox artık dinamik _y ve _height değerlerini takip ediyor
             Hitbox = new Rectangle(_x + paddingX, _y, _width - (paddingX * 2), _height);
         }
 
@@ -130,8 +134,20 @@ namespace KeserKnight.Entity
         {
             if (IsInvincible)
             {
-                InvincibilityTimer++;
-                if (InvincibilityTimer >= InvincibilityDuration) IsInvincible = false;
+                InvincibilityTimer--;
+                if (InvincibilityTimer <= 0) IsInvincible = false;
+            }
+
+            if (KnockbackTimer > 0)
+            {
+                KnockbackTimer--;
+                _x += KnockbackDirection * (KnockbackTimer + 5);
+                UpdateHitbox();
+            }
+
+            if (AttackCooldownTimer > 0)
+            {
+                AttackCooldownTimer--;
             }
 
             if (IsAttacking)
@@ -144,7 +160,8 @@ namespace KeserKnight.Entity
                 }
             }
 
-            if (VerticalVelocity != 0) CurrentState = PlayerState.Jump;
+            if (KnockbackTimer > 0) CurrentState = PlayerState.HitStun;
+            else if (VerticalVelocity != 0) CurrentState = PlayerState.Jump;
             else if (IsCrouching) CurrentState = PlayerState.Crouch;
             else if (MoveLeft || MoveRight) CurrentState = PlayerState.Run;
             else CurrentState = PlayerState.Idle;
@@ -157,7 +174,7 @@ namespace KeserKnight.Entity
                 UpdateHitbox();
             }
 
-            if (CurrentState == PlayerState.Jump || CurrentState == PlayerState.Crouch)
+            if (CurrentState == PlayerState.Jump || CurrentState == PlayerState.Crouch || CurrentState == PlayerState.HitStun)
             {
                 currentFrame = 1;
             }
@@ -208,11 +225,17 @@ namespace KeserKnight.Entity
         public bool TakeDamage()
         {
             if (IsInvincible) return false;
+
             CurrentHealth--;
-            if (CurrentHealth <= 0) return true;
             IsInvincible = true;
-            InvincibilityTimer = 0;
-            return false;
+            InvincibilityTimer = InvincibilityDuration;
+
+            KnockbackTimer = 14;
+            KnockbackDirection = (CurrentDirection == Direction.Right) ? -1 : 1;
+            VerticalVelocity = -16;
+            IsJumping = true;
+
+            return CurrentHealth <= 0;
         }
 
         public void Reset(int startX, int startY)
@@ -220,6 +243,9 @@ namespace KeserKnight.Entity
             CurrentHealth = MaxHealth;
             IsInvincible = false;
             InvincibilityTimer = 0;
+            KnockbackTimer = 0;
+            KnockbackDirection = 0;
+            AttackCooldownTimer = 0;
             IsJumping = false;
             IsAttacking = false;
             IsCrouching = false;

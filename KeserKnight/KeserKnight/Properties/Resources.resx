@@ -127,6 +127,15 @@
   <data name="boss_fire_pose" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PC___Computer_-_Shovel_Knight__Treasure_Trove_-_Enemies_-_Griffoth.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Death" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Death.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Depar" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Depar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Idle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Idle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="idle_sheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\keser_knight_idle_sheet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -148,10 +157,22 @@
   <data name="pence_Griffoth" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pence_Griffoth-removebg-preview.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Shield Bash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shield Bash.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Shield Slam" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shield Slam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="shovel_knight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\oh.jpeg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="sovmalye" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\sovmalye.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Stunned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Stunned.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Walk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Walk.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

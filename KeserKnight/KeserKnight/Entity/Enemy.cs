@@ -7,7 +7,6 @@ namespace KeserKnight.Entity
 {
     public class Enemy
     {
-        //  GEOMETRİK SINIRLAR (ÇELİŞKİSİZ MOTOR) 
         private int _x;
         private int _y;
         private int _width;
@@ -28,31 +27,29 @@ namespace KeserKnight.Entity
         public int Width => _width;
         public int Height => _height;
 
-        //  Düşman öldüyse oyuncuya zarar vermemesi için hitbox'ı boşaltıyoruz 
         public Rectangle Hitbox => IsDead ? Rectangle.Empty : _hitbox;
         private Rectangle _hitbox;
 
         private int speed = 4;
-        private int direction = 1; // 1 = Sağ, -1 = Sol
-        private int leftBound;    // Devriye atacağı sol sınır
-        private int rightBound;   // Devriye atacağı sağ sınır
+        private int direction = 1;
+        private int leftBound;
+        private int rightBound;
 
         public Image Texture { get; set; }
 
-        // --- YENİ SALDIRI VE MENZİL DEĞİŞKENLERİ ---
-        private int detectionRange = 400; // Oyuncuyu fark etme mesafesi (piksel)
-        private int attackRange = 120;    // Kılıç vurma mesafesi
-        private int attackCooldown = 0;   // İki vuruş arası bekleme süresi
+        private int detectionRange = 400;
+        private int attackRange = 120;
+        private int attackCooldown = 0;
         public bool IsEnemyAttacking = false;
         public Rectangle EnemyAttackHitbox { get; private set; }
         public int EnemyAttackTimer = 0;
 
-        public int Health { get; set; } = 20;          // 2 vuruşta ölmesi için (10 + 10 hasar)
-        public bool IsHurt { get; set; } = false;      // Hasar kilit bayrağı
-        public int HurtTimer { get; set; } = 0;        // Flaş ve yerde silinme sayacı
-        public bool IsDead { get; set; } = false;      // Ölüm bayrağı
-        public bool IsGrounded { get; set; } = false;  // Yerde cansız yatıyor mu?
-        public float DeathRotation { get; set; } = 0f; // Yan yatma açısı
+        public int Health { get; set; } = 20;
+        public bool IsHurt { get; set; } = false;
+        public int HurtTimer { get; set; } = 0;
+        public bool IsDead { get; set; } = false;
+        public bool IsGrounded { get; set; } = false;
+        public float DeathRotation { get; set; } = 0f;
 
         private float velocityX;
         private float velocityY;
@@ -73,11 +70,12 @@ namespace KeserKnight.Entity
 
         private void UpdateHitbox()
         {
-            int paddingX = 8;
-            _hitbox = new Rectangle(_x + paddingX, _y, _width - (paddingX * 2), _height);
+            // Pogo optimizasyonu için yatay boşluk payı artırıldı ve tepe noktası biraz aşağı çekildi
+            int paddingX = 14;
+            int topOffset = 12;
+            _hitbox = new Rectangle(_x + paddingX, _y + topOffset, _width - (paddingX * 2), _height - topOffset);
         }
 
-        //  RETRO HASAR ALMA VE SIÇRAMA MOTORU 
         public void TakeDamage(int damage, int hitDirection)
         {
             if (IsDead) return;
@@ -99,10 +97,8 @@ namespace KeserKnight.Entity
             }
         }
 
-        // PARAMETRELİ UPDATE: Form1'deki ana döngünün çağıracağı tam senkronize metot 
         public void Update(List<Rectangle> platforms, Player player)
         {
-            // 1. DURUM: Düşman öldüyse arkadaşının takla ve yerçekimi motoru çalışır 
             if (IsDead)
             {
                 if (!IsGrounded)
@@ -135,7 +131,6 @@ namespace KeserKnight.Entity
                 return;
             }
 
-            // Düşman darbe aldıysa savrulur 
             if (IsHurt)
             {
                 HurtTimer--;
@@ -147,26 +142,21 @@ namespace KeserKnight.Entity
                 return;
             }
 
-            //  Cooldown düşür
             if (attackCooldown > 0) attackCooldown--;
 
-            //  MENZİL VE PLATFORM KONTROLÜ
             bool isSamePlatform = Math.Abs((_y + _height) - (player.Y + player.Height)) < 60;
             int distanceToPlayer = Math.Abs((_x + _width / 2) - (player.X + player.Width / 2));
 
-            //  EĞER OYUNCU MENZİLDEYSE YAPAY ZEKA DEVREYE GİRER 
             if (isSamePlatform && distanceToPlayer <= detectionRange)
             {
-                // Eğer kılıç vurma mesafesindeysek dur ve saldır 
                 if (distanceToPlayer <= attackRange)
                 {
                     if (attackCooldown == 0 && !IsEnemyAttacking)
                     {
                         IsEnemyAttacking = true;
-                        EnemyAttackTimer = 12; // Kılıç ekranda 12 kare kalsın
-                        attackCooldown = 60;   // Saldırı sıklığı
+                        EnemyAttackTimer = 12;
+                        attackCooldown = 60;
 
-                        // Oyuncunun yönüne göre kılıç alanını aç
                         if (player.X + player.Width / 2 > _x + _width / 2) direction = 1;
                         else direction = -1;
 
@@ -176,24 +166,23 @@ namespace KeserKnight.Entity
                             EnemyAttackHitbox = new Rectangle(_x - attackRange, _y + 20, attackRange, _height - 40);
                     }
                 }
-                else // Takip mesafesindeysek oyuncuya doğru yaklaş 
+                else
                 {
                     IsEnemyAttacking = false;
                     if (player.X + player.Width / 2 > _x + _width / 2)
                     {
                         _x += speed;
-                        direction = 1; // Yüzünü sağa çevir
+                        direction = 1;
                     }
                     else
                     {
                         _x -= speed;
-                        direction = -1; // Yüzünü sola çevir
+                        direction = -1;
                     }
                 }
             }
             else
             {
-                // OYUNCU MENZİLDE DEĞİLSE ARKADAŞININ ORİJİNAL HAREKETİ ÇALIŞIR 
                 IsEnemyAttacking = false;
                 _x += speed * direction;
 
@@ -201,7 +190,6 @@ namespace KeserKnight.Entity
                 else if (_x <= leftBound) direction = 1;
             }
 
-            // Kılıç savurma süresi kontrolü
             if (IsEnemyAttacking)
             {
                 EnemyAttackTimer--;
@@ -215,12 +203,10 @@ namespace KeserKnight.Entity
             UpdateHitbox();
         }
 
-        //  Form1'deki eski Update(platforms) çağrılarının patlamaması için köprü satırı
         public void Update(List<Rectangle> platforms)
         {
         }
 
-        // Düşmanı ekrana çizme fonksiyonu 
         public void Draw(Graphics g)
         {
             if (IsDead)
