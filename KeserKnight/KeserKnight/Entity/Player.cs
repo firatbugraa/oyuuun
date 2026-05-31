@@ -74,7 +74,7 @@ namespace KeserKnight.Entity
             }
         }
 
-        public enum PlayerState { Idle, Run, Jump, Crouch, HitStun }
+        public enum PlayerState { Idle, Run, Jump, Crouch, HitStun, Attack }
         public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
         private PlayerState _previousState = PlayerState.Idle;
 
@@ -82,12 +82,13 @@ namespace KeserKnight.Entity
         private Image[] runFrames;
         private Image[] jumpFrames;
         private Image[] crouchFrames;
+        private Image[] attackFrames;
 
         private int currentFrame = 0;
         private int frameTimer = 0;
         public int AnimationSpeed { get; set; } = 4;
 
-        public Player(int x, int y, int width, int height, Image idleSheet, Image runSheet, Image jumpSheet, Image crouchSheet)
+        public Player(int x, int y, int width, int height, Image idleSheet, Image runSheet, Image jumpSheet, Image crouchSheet, Image attackSheet)
         {
             _x = x;
             _y = y;
@@ -98,6 +99,7 @@ namespace KeserKnight.Entity
             runFrames = ExtractFrames(runSheet, 4);
             jumpFrames = ExtractFrames(jumpSheet, 2);
             crouchFrames = ExtractFrames(crouchSheet, 2);
+            attackFrames = ExtractFrames(attackSheet, 4);
 
             UpdateHitbox();
         }
@@ -161,6 +163,7 @@ namespace KeserKnight.Entity
             }
 
             if (KnockbackTimer > 0) CurrentState = PlayerState.HitStun;
+            else if (IsAttacking) CurrentState = PlayerState.Attack;
             else if (VerticalVelocity != 0) CurrentState = PlayerState.Jump;
             else if (IsCrouching) CurrentState = PlayerState.Crouch;
             else if (MoveLeft || MoveRight) CurrentState = PlayerState.Run;
@@ -182,6 +185,13 @@ namespace KeserKnight.Entity
             {
                 currentFrame = 0;
             }
+            else if (CurrentState == PlayerState.Attack)
+            {
+                float progress = (float)AttackTimer / AttackDuration;
+                int frameIndex = (int)(progress * attackFrames.Length);
+                if (frameIndex >= attackFrames.Length) frameIndex = attackFrames.Length - 1;
+                currentFrame = frameIndex;
+            }
             else
             {
                 frameTimer++;
@@ -189,11 +199,6 @@ namespace KeserKnight.Entity
                 {
                     frameTimer = 0;
                     currentFrame++;
-                    int maxFrames = GetCurrentFrameCount();
-                    if (maxFrames > 0 && currentFrame >= maxFrames)
-                    {
-                        currentFrame = 0;
-                    }
                 }
             }
         }
@@ -205,6 +210,7 @@ namespace KeserKnight.Entity
                 case PlayerState.Run: return runFrames.Length;
                 case PlayerState.Jump: return jumpFrames.Length;
                 case PlayerState.Crouch: return crouchFrames.Length;
+                case PlayerState.Attack: return attackFrames.Length;
                 case PlayerState.Idle:
                 default: return idleFrames.Length;
             }
@@ -214,11 +220,21 @@ namespace KeserKnight.Entity
         {
             switch (CurrentState)
             {
-                case PlayerState.Run: return runFrames.Length > 0 ? runFrames[currentFrame] : null;
-                case PlayerState.Jump: return jumpFrames.Length > 0 ? jumpFrames[currentFrame] : null;
-                case PlayerState.Crouch: return crouchFrames.Length > 0 ? crouchFrames[currentFrame] : null;
+                case PlayerState.Run:
+                    return runFrames.Length > 0 ? runFrames[currentFrame % runFrames.Length] : null;
+
+                case PlayerState.Jump:
+                    return jumpFrames.Length > 0 ? jumpFrames[currentFrame % jumpFrames.Length] : null;
+
+                case PlayerState.Crouch:
+                    return crouchFrames.Length > 0 ? crouchFrames[currentFrame % crouchFrames.Length] : null;
+
+                case PlayerState.Attack:
+                    return attackFrames.Length > 0 ? attackFrames[currentFrame % attackFrames.Length] : null;
+
                 case PlayerState.Idle:
-                default: return idleFrames.Length > 0 ? idleFrames[currentFrame] : null;
+                default:
+                    return idleFrames.Length > 0 ? idleFrames[currentFrame % idleFrames.Length] : null;
             }
         }
 

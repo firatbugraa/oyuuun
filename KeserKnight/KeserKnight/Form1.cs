@@ -66,6 +66,7 @@ namespace KeserKnight
         private int[] selectAncorRooms = { 3, 6, 9, 12, 13, 14, 15 };
         private int selectRoomIndex = 0;
 
+        private List<ParallaxLayer> currentBgLayers;
         public enum GameState { MainMenu, LevelSelect, Playing, Paused, Victory }
         public GameState currentGameState = GameState.MainMenu;
 
@@ -92,7 +93,8 @@ namespace KeserKnight
                 Properties.Resources.idle_sheet,
                 Properties.Resources.ninja_run,
                 Properties.Resources.ninja_jump,
-                Properties.Resources.ninja_crouch);
+                Properties.Resources.ninja_crouch,
+                Properties.Resources.ninja_attack);
 
             physicsEngine = new PhysicsEngine();
             attackSystem = new AttackSystem();
@@ -104,12 +106,82 @@ namespace KeserKnight
             this.Focus();
 
             hasSaveFile = File.Exists("savegame.dat");
+            
             if (hasSaveFile)
             {
                 startButton = new Rectangle(810, 510, 300, 60);
             }
+            Image rawTile = Properties.Resources.mist_forest_background_tiles;
+
+            int srcStartX = 48;
+            int srcStartY = 16;
+            int srcWidth = (rawTile.Width / 2) - srcStartX;
+            int srcHeight = rawTile.Height - srcStartY;
+            float scaleGrass = 2.5f;
+            int destWidth = (int)(srcWidth * scaleGrass);
+            int destHeight = (int)(srcHeight * scaleGrass);
 
             SyncLoadRoom();
+        }
+
+        // --- YENİ EKLENEN ARKA PLAN YÜKLEME METODU ---
+        private void LoadRoomBackground(int roomNumber)
+        {
+            if (currentBgLayers == null) currentBgLayers = new List<ParallaxLayer>();
+            currentBgLayers.Clear();
+
+            // --- BÖLÜM 1: SİSLİ ORMAN (Odalar 1 - 7) ---
+            if (roomNumber >= 1 && roomNumber <= 7)
+            {
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_bg_base, 0.0f, 0, false));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_bg_trees, 0.2f, 100));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_fg_tree, 0.4f, 50));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_fg_rocks, 0.6f, targetHeight - 300));
+            }
+            // --- BÖLÜM 2: BOSS ARENASI (Oda 8 - Dağ Zirvesi) ---
+            else if (roomNumber == 8)
+            {
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_bg_base, 0.0f, 0, false));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_bg_trees, 0.1f, 150));
+            }
+            // --- BÖLÜM 3: GEÇİŞ KORİDORU (Odalar 9 - 10 - Su Odaları) ---
+            else if (roomNumber == 9 || roomNumber == 10)
+            {
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_sky, 0.0f, 0, false));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_mountains_far, 0.1f, 200)); // Uzak dağlar belirmeye başlıyor
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.mist_fg_rocks, 0.3f, targetHeight - 400));
+            }
+            // --- BÖLÜM 4: ŞEHRİN ALTI / MAHMENLER (Odalar 11 - 12) ---
+            else if (roomNumber == 11 || roomNumber == 12)
+            {
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_sky, 0.0f, 0, false));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_mountains_far, 0.1f, 100));
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_mountains_town, 0.2f, 150)); // Şehir ışıkları görünüyor
+            }
+            // --- BÖLÜM 5: GECE ŞEHRİ VE FİNAL (Odalar 13 - 15) ---
+            else if (roomNumber >= 13)
+            {
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_sky, 0.0f, 0, false));
+
+                // Final odasında (15) daha görkemli bir şehir manzarası için katmanları sıklaştırıyoruz
+                if (roomNumber == 15)
+                {
+                    currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_mountains_town, 0.1f, 100));
+                    currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_city_buildings, 0.3f, 0));
+                }
+                else
+                {
+                    currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_city_buildings, 0.3f, 0));
+                }
+
+                // Final odasında ekstra objelerle (saat kulesi vs.) detay ekliyoruz
+                if (roomNumber >= 14)
+                {
+                    currentBgLayers.Add(new ParallaxLayer(Properties.Resources.dec_city_props, 0.5f, 50));
+                }
+
+                currentBgLayers.Add(new ParallaxLayer(Properties.Resources.bg_clouds, 0.7f, 30));
+            }
         }
 
         void SyncLoadRoom()
@@ -145,6 +217,9 @@ namespace KeserKnight
             {
                 checkpointTorch = null;
             }
+
+            // ODA YÜKLENDİĞİNDE ARKA PLAN KATMANLARINI OLUŞTURUYORUZ USTA
+            LoadRoomBackground(roomManager.CurrentRoom);
 
             miniBoss = GameMap.GetBossInstance(roomManager.CurrentRoom);
             shieldKnight = (roomManager.CurrentRoom == 12) ? new RoyalShieldKnight(1400, 700, 90, 130) : null;
@@ -645,7 +720,7 @@ namespace KeserKnight
                     canvasGraphics.DrawString("NINJA GIBI BUTUN KILITLERI KIRDIN, SANTIYEYI TESLIM ALDIN!", subTitleFont, Brushes.Cyan, 330, 380);
 
                     string durationStr = string.Format("{0:00}:{1:00}:{2:00}", finalCompletionTime.Hours, finalCompletionTime.Minutes, finalCompletionTime.Seconds);
-                    canvasGraphics.DrawString($"TOPLAM SURE       : {durationStr}", statsFont, Brushes.LightCyan, 620, 480);
+                    canvasGraphics.DrawString($"TOPLAM SURE        : {durationStr}", statsFont, Brushes.LightCyan, 620, 480);
                     canvasGraphics.DrawString($"TOPLAM OLUM SAYISI: {totalDeaths}", statsFont, Brushes.Tomato, 620, 540);
 
                     string rankTitle = "YEVMIYECI CIRAK (Surgundeki Ninja)";
@@ -704,14 +779,18 @@ namespace KeserKnight
             }
             else
             {
-                // KATMAN 1: Arka Plan Temizliği
-                Color bgTone = (roomManager.CurrentRoom == 15) ? Color.FromArgb(20, 50, 90) :
-                              ((roomManager.CurrentRoom == 14) ? Color.FromArgb(40, 170, 255) :
-                              ((roomManager.CurrentRoom == 13) ? Color.FromArgb(160, 0, 150) :
-                              ((roomManager.CurrentRoom == 12) ? Color.FromArgb(170, 20, 160) :
-                              ((roomManager.CurrentRoom == 11) ? Color.FromArgb(24, 85, 40) :
-                              ((roomManager.CurrentRoom == 9 || roomManager.CurrentRoom == 10) ? Color.FromArgb(12, 16, 26) : Color.FromArgb(20, 24, 43))))));
-                canvasGraphics.Clear(bgTone);
+                // --- KATMAN 1: Arka Plan (Parallax Sistemi) ---
+                if (currentBgLayers != null && currentBgLayers.Count > 0)
+                {
+                    foreach (var layer in currentBgLayers)
+                    {
+                        layer.Draw(canvasGraphics, player.X, targetWidth, targetHeight);
+                    }
+                }
+                else
+                {
+                    canvasGraphics.Clear(Color.FromArgb(20, 24, 43)); // Güvenlik katmanı
+                }
 
                 if (roomManager.CurrentRoom == 12)
                 {
@@ -734,11 +813,56 @@ namespace KeserKnight
                     }
                 }
 
-                // KATMAN 2: Platformlar
+                // --- KATMAN 2: Platformlar ---
                 Brush platformBrush = (roomManager.CurrentRoom == 14) ? Brushes.SaddleBrown :
                                       ((roomManager.CurrentRoom == 11 || roomManager.CurrentRoom == 12 || roomManager.CurrentRoom == 13) ? Brushes.Goldenrod : Brushes.LightSlateGray);
 
-                foreach (var platform in platforms) canvasGraphics.FillRectangle(platformBrush, platform);
+                foreach (var platform in platforms)
+                {
+                    if (roomManager.CurrentRoom <= 7)
+                    {
+                        // 1. ADIM (DIRT BLOCK): Preview'daki orijinal koyu yeşilimsi siyah toprak rengi
+                        using (SolidBrush dirtBrush = new SolidBrush(Color.FromArgb(14, 28, 28)))
+                        {
+                            canvasGraphics.FillRectangle(dirtBrush, platform);
+                        }
+
+                        // 2. ADIM (GRASS BLOCK): Anlık kes-yapıştır yöntemi (Çok daha performanslı)
+                        Image tileImg = Properties.Resources.mist_forest_background_tiles;
+                        if (tileImg != null)
+                        {
+                            int srcStartX = 48; // Siyah-beyaz şeridi atlıyoruz
+                            int srcStartY = 16; // Şeffaf boşluğu atlıyoruz
+                            int yVisualOffset = 40; // Karakterin çime gömülme oranı
+
+                            int srcWidth = (tileImg.Width / 2) - srcStartX;
+                            int srcHeight = tileImg.Height - srcStartY;
+
+                            float scale = 2.5f;
+                            int destWidth = (int)(srcWidth * scale);
+                            int destHeight = (int)(srcHeight * scale);
+
+                            for (int x = platform.X; x < platform.Right; x += destWidth)
+                            {
+                                int currentDestWidth = Math.Min(destWidth, platform.Right - x);
+                                int currentSrcWidth = (int)(currentDestWidth / scale);
+
+                                int currentDestHeight = Math.Min(destHeight, platform.Height + yVisualOffset);
+                                int currentSrcHeight = (int)(currentDestHeight / scale);
+
+                                Rectangle destRect = new Rectangle(x, platform.Y - yVisualOffset, currentDestWidth, currentDestHeight);
+                                Rectangle srcRect = new Rectangle(srcStartX, srcStartY, currentSrcWidth, currentSrcHeight);
+
+                                canvasGraphics.DrawImage(tileImg, destRect, srcRect, GraphicsUnit.Pixel);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        canvasGraphics.FillRectangle(platformBrush, platform);
+                    }
+                }
+
                 foreach (var gold in roomGolds) gold.Draw(canvasGraphics);
                 foreach (var block in breakableBlocks) block.Draw(canvasGraphics);
                 foreach (var tBlock in timedBlocks) tBlock.Draw(canvasGraphics);
@@ -823,7 +947,8 @@ namespace KeserKnight
                 {
                     float progress = (float)player.AttackTimer / player.AttackDuration;
                     int alpha = (int)(255 * (1.0f - progress)); if (alpha < 0) alpha = 0;
-                    int arcSize = (int)(110 + (progress * 20)); Rectangle arcBounds; float startAngle, sweepAngle;
+
+                    int arcSize = (int)(80 + (progress * 15)); Rectangle arcBounds; float startAngle, sweepAngle;
 
                     bool isDownAttacking = (GetAsyncKeyState((int)Keys.S) & 0x8000) != 0 || (GetAsyncKeyState((int)Keys.Down) & 0x8000) != 0;
 
@@ -835,9 +960,21 @@ namespace KeserKnight
                     }
                     else
                     {
-                        int arcY = player.Hitbox.Y + 10; int facing = (player.CurrentDirection == Player.Direction.Right) ? 1 : -1;
-                        if (facing == 1) { int arcX = player.Hitbox.Right - 35; arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize); startAngle = -90 + (progress * 25); sweepAngle = 180; }
-                        else { int arcX = player.Hitbox.X - arcSize + 35; arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize); startAngle = 270 - (progress * 25); sweepAngle = -180; }
+                        int arcY = player.Hitbox.Y + 25;
+                        int facing = (player.CurrentDirection == Player.Direction.Right) ? 1 : -1;
+
+                        if (facing == 1)
+                        {
+                            int arcX = player.Hitbox.Right - 45;
+                            arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+                            startAngle = -90 + (progress * 25); sweepAngle = 180;
+                        }
+                        else
+                        {
+                            int arcX = player.Hitbox.X - arcSize + 45;
+                            arcBounds = new Rectangle(arcX, arcY, arcSize, arcSize);
+                            startAngle = 270 - (progress * 25); sweepAngle = -180;
+                        }
                     }
 
                     using (Pen neonPen = new Pen(Color.FromArgb((int)(alpha * 0.8f), 0, 235, 255), 3f)) { neonPen.StartCap = LineCap.Round; neonPen.EndCap = LineCap.Round; canvasGraphics.DrawArc(neonPen, arcBounds, startAngle, sweepAngle); }

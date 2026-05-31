@@ -70,6 +70,7 @@
     <Compile Include="Map\Gold.cs" />
     <Compile Include="Map\RoomManager.cs" />
     <Compile Include="Map\Tile.cs" />
+    <Compile Include="Core\ParallaxLayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -141,6 +142,45 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PC___Computer_-_Shovel_Knight__Treasure_Trove_-_Enemies_-_Griffoth.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ninja_attack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mist_bg_trees.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mist_fg_rocks.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mist_forest_background_tiles.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mist_fg_tree.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_city_buildings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_clouds.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_forest.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_mountains_far.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_mountains_town.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bg_sky.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\dec_city_props.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\misg_bg_base.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
